@@ -3,10 +3,10 @@
 void run_demo() {
     printf("=== gmdh demo on water quality dataset ===\n\n");
     
-    // load data (predict pH_output from input features - column 27, 0-indexed)
+    // load data (predict pH_tank3 from input features - column 23, 0-indexed)
     printf("loading water_quality.csv...\n");
-    printf("target: pH_output (column 28)\n");
-    dataset_t *ds = load_csv("water_quality.csv", 27);
+    printf("target: pH_tank3 (output pH, column 24)\n");
+    dataset_t *ds = load_csv("water_quality.csv", 23);
     if (!ds) {
         fprintf(stderr, "failed to load dataset\n");
         return;

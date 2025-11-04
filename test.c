@@ -87,12 +87,12 @@ int test_r2_calculation() {
 int test_csv_loading() {
     TEST(csv_loading);
     
-    dataset_t *ds = load_csv("water_quality.csv", 27); // pH_output as target
+    dataset_t *ds = load_csv("water_quality.csv", 23); // pH_tank3 as target
     
     ASSERT(ds != NULL, "dataset should load");
     ASSERT(ds->n_samples > 0, "should have samples");
     ASSERT(ds->n_features > 0, "should have features");
-    ASSERT(ds->n_features == 39, "should have 39 features");
+    ASSERT(ds->n_features == 38, "should have 38 features");
     
     printf("  loaded %d samples, %d features\n", ds->n_samples, ds->n_features);
     
@@ -104,7 +104,7 @@ int test_csv_loading() {
 int test_dataset_split() {
     TEST(dataset_split);
     
-    dataset_t *ds = load_csv("water_quality.csv", 27);
+    dataset_t *ds = load_csv("water_quality.csv", 23);
     ASSERT(ds != NULL, "dataset should load");
     
     dataset_t *train, *test;
@@ -127,7 +127,7 @@ int test_dataset_split() {
 int test_combinatorial_gmdh() {
     TEST(combinatorial_gmdh);
     
-    dataset_t *ds = load_csv("water_quality.csv", 27);
+    dataset_t *ds = load_csv("water_quality.csv", 23);
     ASSERT(ds != NULL, "dataset should load");
     
     // use subset of features for faster testing
@@ -158,7 +158,7 @@ int test_combinatorial_gmdh() {
 int test_multirow_gmdh() {
     TEST(multirow_gmdh);
     
-    dataset_t *ds = load_csv("water_quality.csv", 27);
+    dataset_t *ds = load_csv("water_quality.csv", 23);
     ASSERT(ds != NULL, "dataset should load");
     
     // use subset for faster testing
