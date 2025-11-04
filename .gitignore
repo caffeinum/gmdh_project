@@ -1,0 +1,23 @@
+# build artifacts
+build/
+bin/
+*.o
+*.a
+*.so
+
+# executables
+gmdh
+test_gmdh
+
+# editor/ide
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# debug
+*.dSYM/
+core
+vgcore.*
