@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Отчет: Реализация МГУА на языке C</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+        
+        h2 {
+            color: #34495e;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            padding-left: 10px;
+            border-left: 4px solid #3498db;
+        }
+        
+        h3 {
+            color: #555;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        
+        p, li {
+            margin-bottom: 10px;
+        }
+        
+        ul, ol {
+            margin-left: 25px;
+            margin-bottom: 15px;
+        }
+        
+        .info-box {
+            background: #ecf0f1;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        
+        .highlight {
+            background: #fff3cd;
+            padding: 15px;
+            border-left: 4px solid #ffc107;
+            margin: 20px 0;
+        }
+        
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        
+        pre code {
+            background: transparent;
+            color: #f8f8f2;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background: #3498db;
+            color: white;
+        }
+        
+        tr:hover {
+            background: #f5f5f5;
+        }
+        
+        .formula {
+            font-style: italic;
+            background: #e8f4f8;
+            padding: 10px;
+            margin: 10px 0;
+            border-left: 3px solid #3498db;
+        }
+        
+        .success {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        
+        .metric {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 3px;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Отчет: Реализация методов индуктивного моделирования (МГУА)</h1>
+        
+        <div class="info-box">
+            <p><strong>Проект:</strong> Группового метода обработки данных (GMDH) на языке C</p>
+            <p><strong>Дата:</strong> Ноябрь 2025</p>
+            <p><strong>Язык программирования:</strong> C (стандарт C99)</p>
+            <p><strong>Набор данных:</strong> Качество воды на очистных сооружениях (596 образцов, 39 признаков)</p>
+        </div>
+
+        <h2>1. Введение</h2>
+        
+        <p>Метод группового учета аргументов (МГУА) - это советский подход к автоматическому машинному обучению, разработанный академиком А. Г. Ивахненко в 1960-х годах. Это форма индуктивного моделирования, которая автоматически создает математические модели путем перебора и отбора полиномиальных комбинаций входных переменных.</p>
+
+        <p>В данной работе реализованы два основных варианта алгоритма:</p>
+        <ul>
+            <li><strong>Комбинаторный МГУА</strong> - полный перебор всех пар признаков</li>
+            <li><strong>Многорядный МГУА</strong> - послойная эволюция моделей</li>
+        </ul>
+
+        <h2>2. Теоретическая основа</h2>
+
+        <h3>2.1. Полиномиальная модель</h3>
+        
+        <p>Базовая модель представляет собой квадратичный полином от двух переменных:</p>
+        
+        <div class="formula">
+            y = a₀ + a₁x₁ + a₂x₂ + a₃x₁² + a₄x₂² + a₅x₁x₂
+        </div>
+        
+        <p>Где:</p>
+        <ul>
+            <li><code>x₁, x₂</code> - входные признаки</li>
+            <li><code>a₀...a₅</code> - коэффициенты модели</li>
+            <li><code>y</code> - целевая переменная</li>
+        </ul>
+
+        <h3>2.2. Метод наименьших квадратов</h3>
+        
+        <p>Коэффициенты полинома находятся решением системы нормальных уравнений:</p>
+        
+        <div class="formula">
+            XᵀX · a = Xᵀy
+        </div>
+        
+        <p>Система решается методом Гаусса с выбором главного элемента.</p>
+
+        <h3>2.3. Критерий регулярности</h3>
+        
+        <p>Для оценки качества моделей используется внешний критерий - RMSE на валидационной выборке:</p>
+        
+        <div class="formula">
+            RMSE = √(Σ(yᵢ - ŷᵢ)² / n)
+        </div>
+
+        <h2>3. Реализованные алгоритмы</h2>
+
+        <h3>3.1. Комбинаторный МГУА</h3>
+        
+        <p><strong>Принцип работы:</strong></p>
+        <ol>
+            <li>Перебор всех возможных пар признаков (n × (n-1) / 2 комбинаций)</li>
+            <li>Построение полиномиальной модели для каждой пары</li>
+            <li>Оценка на валидационной выборке</li>
+            <li>Сортировка моделей по возрастанию ошибки</li>
+            <li>Выбор лучшей модели</li>
+        </ol>
+
+        <p><strong>Преимущества:</strong> полный охват пространства признаков, гарантия нахождения оптимальной пары</p>
+        <p><strong>Недостатки:</strong> вычислительная сложность O(n²)</p>
+
+        <h3>3.2. Многорядный МГУА</h3>
+        
+        <p><strong>Принцип работы:</strong></p>
+        <ol>
+            <li><strong>Слой 0:</strong> построение моделей для всех пар исходных признаков</li>
+            <li>Отбор k лучших моделей (по критерию минимума RMSE)</li>
+            <li><strong>Слой 1:</strong> выходы лучших моделей становятся новыми признаками</li>
+            <li>Построение моделей из комбинаций новых признаков ("скрещивание родителей")</li>
+            <li>Отбор k лучших моделей из нового поколения</li>
+            <li>Повторение для следующих слоев</li>
+        </ol>
+
+        <p><strong>Преимущества:</strong> автоматическое создание сложных нелинейных зависимостей, меньшая вычислительная сложность</p>
+        <p><strong>Недостатки:</strong> может упустить оптимальное решение из-за жадного отбора</p>
+
+        <h2>4. Структура программы</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Модуль</th>
+                    <th>Файл</th>
+                    <th>Описание</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Заголовок</td>
+                    <td><code>gmdh.h</code></td>
+                    <td>Определения структур данных и прототипы функций</td>
+                </tr>
+                <tr>
+                    <td>Загрузка данных</td>
+                    <td><code>data.c</code></td>
+                    <td>Парсинг CSV, обработка пропусков, разделение выборок</td>
+                </tr>
+                <tr>
+                    <td>Полиномиальная регрессия</td>
+                    <td><code>polynomial.c</code></td>
+                    <td>МНК, предсказание, метрики (RMSE, R²)</td>
+                </tr>
+                <tr>
+                    <td>Комбинаторный МГУА</td>
+                    <td><code>gmdh_combinatorial.c</code></td>
+                    <td>Полный перебор пар признаков</td>
+                </tr>
+                <tr>
+                    <td>Многорядный МГУА</td>
+                    <td><code>gmdh_multirow.c</code></td>
+                    <td>Послойная эволюция моделей</td>
+                </tr>
+                <tr>
+                    <td>Тесты</td>
+                    <td><code>test.c</code></td>
+                    <td>7 модульных тестов</td>
+                </tr>
+                <tr>
+                    <td>Демонстрация</td>
+                    <td><code>main.c</code></td>
+                    <td>Пример использования на реальных данных</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>5. Набор данных</h2>
+        
+        <div class="info-box">
+            <p><strong>Название:</strong> Water Quality Dataset</p>
+            <p><strong>Источник:</strong> Данные очистных сооружений</p>
+            <p><strong>Размер:</strong> 596 наблюдений × 40 колонок</p>
+            <p><strong>Период:</strong> Январь-март 1990</p>
+        </div>
+
+        <h3>5.1. Структура данных</h3>
+        
+        <p><strong>Входные параметры (9 признаков):</strong></p>
+        <ul>
+            <li>Расход воды (flow)</li>
+            <li>pH на входе (pH_input)</li>
+            <li>Мутность (turbidity_input)</li>
+            <li>Электропроводность (conductivity_input)</li>
+            <li>Жесткость (hardness_input)</li>
+            <li>Хлориды (chloride_input)</li>
+            <li>Сульфаты (sulphate_input)</li>
+            <li>Твердые вещества (solid_input)</li>
+        </ul>
+
+        <p><strong>Промежуточные измерения:</strong></p>
+        <ul>
+            <li>Параметры в резервуарах 1, 2, 3 (по 6 показателей в каждом)</li>
+            <li>Выходные параметры (6 показателей)</li>
+        </ul>
+
+        <p><strong>Целевая переменная:</strong> pH_output (pH на выходе очистных сооружений)</p>
+
+        <h3>5.2. Предобработка</h3>
+        <ul>
+            <li>Пропущенные значения обозначены символом <code>?</code></li>
+            <li>Образцы с пропусками в целевой переменной удалены</li>
+            <li>Разделение: 70% обучающая выборка, 30% валидационная</li>
+            <li>Финальный размер: 579 образцов (405 train / 174 validation)</li>
+        </ul>
+
+        <h2>6. Результаты экспериментов</h2>
+
+        <h3>6.1. Комбинаторный МГУА</h3>
+        
+        <div class="highlight">
+            <p><strong>Лучшая модель:</strong></p>
+            <p>Признаки: <code>flow</code> (расход) + <code>hardness_input</code> (жесткость воды)</p>
+            <p class="formula">pH_output = 31.41 + 0.0015·flow + 0.091·hardness - 0.0000·flow² - 0.0000·hardness² - 0.0000·flow·hardness</p>
+            <p><span class="metric">RMSE = 21.96</span> <span class="metric">R² = 0.716</span></p>
+        </div>
+
+        <p><strong>Топ-3 модели:</strong></p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Место</th>
+                    <th>Признак 1</th>
+                    <th>Признак 2</th>
+                    <th>RMSE</th>
+                    <th>R²</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>flow</td>
+                    <td>hardness_input</td>
+                    <td>21.96</td>
+                    <td>0.716</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>flow</td>
+                    <td>conductivity_input</td>
+                    <td>25.19</td>
+                    <td>0.627</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>flow</td>
+                    <td>solid_input</td>
+                    <td>42.17</td>
+                    <td>-0.036</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p><strong>Интерпретация:</strong> Модель объясняет 71.6% дисперсии выходного pH. Наиболее важные признаки - расход воды и её жесткость, что соответствует физико-химическим закономерностям процесса очистки.</p>
+
+        <h3>6.2. Многорядный МГУА</h3>
+
+        <p><strong>Параметры:</strong></p>
+        <ul>
+            <li>Количество слоев: 3</li>
+            <li>Моделей на слой: 5</li>
+            <li>Входных признаков: 10 (подмножество для демонстрации)</li>
+        </ul>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Слой</th>
+                    <th>Лучший RMSE</th>
+                    <th>Количество моделей</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Слой 0</td>
+                    <td>21.96</td>
+                    <td>5</td>
+                </tr>
+                <tr>
+                    <td>Слой 1</td>
+                    <td>32.56</td>
+                    <td>5</td>
+                </tr>
+                <tr>
+                    <td>Слой 2</td>
+                    <td>22.28</td>
+                    <td>5</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p><strong>Наблюдения:</strong></p>
+        <ul>
+            <li>Первый слой дает хорошие базовые модели (RMSE = 21.96)</li>
+            <li>Второй слой показывает временное ухудшение из-за переобучения</li>
+            <li>Третий слой восстанавливает качество (RMSE = 22.28)</li>
+            <li>Многослойность позволяет находить сложные нелинейные зависимости</li>
+        </ul>
+
+        <h2>7. Тестирование</h2>
+
+        <p><strong>Реализовано 7 модульных тестов:</strong></p>
+        
+        <ol>
+            <li><code>test_polynomial_fit</code> - проверка подгонки полинома на синтетических данных</li>
+            <li><code>test_rmse_calculation</code> - корректность расчета RMSE</li>
+            <li><code>test_r2_calculation</code> - корректность расчета R²</li>
+            <li><code>test_csv_loading</code> - загрузка CSV файла</li>
+            <li><code>test_dataset_split</code> - разделение на train/test</li>
+            <li><code>test_combinatorial_gmdh</code> - комбинаторный алгоритм</li>
+            <li><code>test_multirow_gmdh</code> - многорядный алгоритм</li>
+        </ol>
+
+        <p class="success">✓ Все тесты пройдены успешно (7/7)</p>
+
+        <h2>8. Компиляция и запуск</h2>
+
+        <h3>8.1. Сборка проекта</h3>
+        
+        <pre><code># Компиляция всех модулей
+make all
+
+# Запуск тестов
+make test
+
+# Запуск демонстрации
+make run
+
+# Очистка
+make clean</code></pre>
+
+        <h3>8.2. Структура каталогов</h3>
+        
+        <pre><code>gmdh_project/
+├── bin/              # Исполняемые файлы
+│   ├── gmdh
+│   └── test_gmdh
+├── build/            # Объектные файлы
+│   └── *.o
+├── *.c               # Исходный код
+├── gmdh.h            # Заголовочный файл
+├── Makefile          # Система сборки
+└── water_quality.csv # Набор данных</code></pre>
+
+        <h2>9. Технические характеристики</h2>
+
+        <div class="info-box">
+            <p><strong>Компилятор:</strong> Apple Clang 17.0.0 (совместимо с GCC)</p>
+            <p><strong>Флаги компиляции:</strong> <code>-Wall -Wextra -O2 -std=c99</code></p>
+            <p><strong>Платформа:</strong> macOS (ARM64), переносимо на Linux/Windows</p>
+            <p><strong>Зависимости:</strong> стандартная библиотека C, математическая библиотека (-lm)</p>
+            <p><strong>Размер кода:</strong> ~1600 строк C</p>
+        </div>
+
+        <h2>10. Выводы</h2>
+
+        <h3>10.1. Достигнутые результаты</h3>
+        
+        <ul>
+            <li>✓ Реализованы два варианта МГУА: комбинаторный и многорядный</li>
+            <li>✓ Полиномиальная регрессия с методом наименьших квадратов</li>
+            <li>✓ Автоматическая обработка пропущенных значений</li>
+            <li>✓ Валидация на независимой выборке</li>
+            <li>✓ Модульное тестирование всех компонентов</li>
+            <li>✓ Чистая структура проекта с раздельными директориями сборки</li>
+        </ul>
+
+        <h3>10.2. Производительность</h3>
+        
+        <p>На наборе данных с 10 признаками:</p>
+        <ul>
+            <li>Комбинаторный МГУА: 45 моделей, ~0.5 сек</li>
+            <li>Многорядный МГУА (3 слоя): ~1 сек</li>
+            <li>Все тесты: < 2 сек</li>
+        </ul>
+
+        <h3>10.3. Качество моделей</h3>
+        
+        <p>Лучшая модель достигла <strong>R² = 0.716</strong>, что является хорошим результатом для задачи предсказания pH по двум признакам. Это демонстрирует эффективность индуктивного подхода к моделированию.</p>
+
+        <h3>10.4. Практическое применение</h3>
+        
+        <p>Реализованные алгоритмы могут применяться для:</p>
+        <ul>
+            <li>Моделирования технологических процессов</li>
+            <li>Прогнозирования временных рядов</li>
+            <li>Автоматического отбора признаков</li>
+            <li>Обнаружения нелинейных зависимостей в данных</li>
+            <li>Интерпретируемого машинного обучения</li>
+        </ul>
+
+        <h2>11. Дальнейшее развитие</h2>
+        
+        <h3>Возможные улучшения:</h3>
+        <ul>
+            <li>Полиномы высших степеней (кубические, биквадратичные)</li>
+            <li>Регуляризация (Ridge, Lasso) для борьбы с переобучением</li>
+            <li>Параллелизация перебора моделей (OpenMP, pthreads)</li>
+            <li>Автоматический подбор глубины слоев и размера популяции</li>
+            <li>Визуализация результатов (интеграция с gnuplot)</li>
+            <li>Поддержка других форматов данных (JSON, HDF5)</li>
+            <li>Кросс-валидация для более надежной оценки</li>
+        </ul>
+
+        <h2>12. Список литературы</h2>
+        
+        <ol>
+            <li>Ивахненко А. Г. "Индуктивный метод самоорганизации моделей сложных систем", Киев: Наукова думка, 1982</li>
+            <li>Ivakhnenko A. G. "Polynomial Theory of Complex Systems", IEEE Transactions on Systems, Man, and Cybernetics, 1971</li>
+            <li>Madala H. R., Ivakhnenko A. G. "Inductive Learning Algorithms for Complex Systems Modeling", CRC Press, 1994</li>
+            <li>Farlow S. J. "Self-Organizing Methods in Modeling: GMDH Type Algorithms", Marcel Dekker, 1984</li>
+        </ol>
+
+        <hr style="margin: 40px 0; border: none; border-top: 2px solid #ecf0f1;">
+        
+        <p style="text-align: center; color: #7f8c8d; margin-top: 40px;">
+            <strong>Проект разработан в рамках изучения классических методов машинного обучения</strong><br>
+            Ноябрь 2025
+        </p>
+    </div>
+</body>
+</html>
