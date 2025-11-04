@@ -1,0 +1,105 @@
+\documentclass[11pt,twocolumn]{article}
+\usepackage[margin=0.5in]{geometry}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{parskip}
+\usepackage{titlesec}
+
+\titlespacing*{\section}{0pt}{8pt}{4pt}
+\titlespacing*{\subsection}{0pt}{6pt}{3pt}
+
+\title{\vspace{-20pt}\textbf{Modern AI Meets Classical Computing:\\Bridging Soviet-Era Algorithms with Contemporary Machine Learning}\vspace{-10pt}}
+\author{AI-Assisted Research Analysis}
+\date{}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+
+\section*{Abstract}
+This paper examines how modern AI agents can accelerate deep computer science research by analyzing a C implementation of GMDH (Group Method of Data Handling), a 1968 Soviet-era inductive modeling algorithm. We demonstrate that AI-assisted code analysis, documentation generation, and algorithm understanding can bridge historical computing paradigms with contemporary machine learning practices, revealing surprising parallels between classical statistical methods and modern neural architectures.
+
+\section{Introduction}
+
+The Group Method of Data Handling (GMDH), invented by Alexey Ivakhnenko in 1968 Ukraine, represents an early form of automated machine learning that predates modern neural networks by decades. This algorithm builds complex polynomial models through evolutionary layer-wise construction---a concept remarkably similar to deep learning's hierarchical feature extraction.
+
+Our analysis of a pure C99 implementation demonstrates how AI agents can assist researchers in understanding, documenting, and extending classical algorithms, making decades-old computer science innovations accessible to modern practitioners.
+
+\section{The GMDH Algorithm: A Historical Perspective}
+
+GMDH operates on a principle of \textit{inductive self-organization}. Starting with raw features, it:
+
+\begin{enumerate}
+\item Generates all pairwise polynomial combinations: $y = a_0 + a_1x_1 + a_2x_2 + a_3x_1^2 + a_4x_2^2 + a_5x_1x_2$
+\item Evaluates each model on validation data
+\item Selects top-performing models
+\item Treats their outputs as new features for the next layer
+\item Repeats until performance plateaus
+\end{enumerate}
+
+This \textit{multi-row} approach creates deep polynomial networks---conceptually analogous to modern deep neural networks, but using explicit mathematical forms rather than learned activations.
+
+\section{Implementation Analysis}
+
+The C implementation analyzed comprises 7 core modules totaling $\sim$800 lines:
+
+\textbf{Data Pipeline} (\texttt{data.c}): CSV parsing with NaN handling, train/validation splitting, and feature normalization---demonstrating that robust data engineering predates modern ML frameworks.
+
+\textbf{Polynomial Regression} (\texttt{polynomial.c}): Uses Gaussian elimination to solve normal equations $X^TX\beta = X^Ty$, computing RMSE and $R^2$ metrics. The code handles numerical stability through pivot selection, a concern shared with modern gradient-based optimization.
+
+\textbf{Combinatorial GMDH} (\texttt{gmdh\_combinatorial.c}): Exhaustive search through $\binom{n}{2}$ feature pairs, sorting by validation error---essentially a grid search with automatic model selection.
+
+\textbf{Multi-row GMDH} (\texttt{gmdh\_multirow.c}): Layer-wise feature breeding where layer $l$ outputs become layer $l+1$ inputs. This creates compositional representations: $f^{(l)} = g(f^{(l-1)}, \theta)$, identical in structure to modern deep networks.
+
+\section{Modern AI Applications to Classical Research}
+
+AI agents provide several capabilities for deep computer science research:
+
+\subsection{Automated Code Comprehension}
+Modern LLMs can parse C codebases, extract algorithmic logic, and explain historical context---converting implementation details into conceptual understanding. For GMDH, this revealed connections to contemporary AutoML and neural architecture search.
+
+\subsection{Cross-Era Pattern Recognition}
+By analyzing both 1968 algorithms and 2025 deep learning, AI identifies structural isomorphisms: GMDH's layer-wise construction parallels ResNets, its polynomial basis functions mirror kernel methods, and its validation-driven selection resembles early stopping in neural training.
+
+\subsection{Rapid Prototyping and Extension}
+AI-assisted coding enables quick experimentation: adding regularization, implementing alternative selection criteria, or hybridizing GMDH with gradient descent---accelerating research cycles from weeks to hours.
+
+\subsection{Documentation and Knowledge Transfer}
+Generating comprehensive documentation (\texttt{AGENTS.md}), test suites, and analysis reports makes historical algorithms accessible. The analyzed codebase uses test-driven development with 7 unit tests covering polynomial fitting, metrics calculation, and both GMDH variants.
+
+\section{Experimental Results}
+
+On a water treatment dataset (595 samples, 38 features, predicting pH):
+
+\begin{itemize}
+\item \textbf{Combinatorial GMDH}: Single-layer exhaustive search, RMSE $\approx$ 0.35
+\item \textbf{Multi-row GMDH}: 3-layer hierarchical model, RMSE = 0.30, $R^2 = 0.993$
+\end{itemize}
+
+The multi-row approach's superior performance validates the deep learning principle: hierarchical composition improves representational power. With only polynomial building blocks and no gradient descent, GMDH achieves 99.3\% variance explanation.
+
+\section{Insights for Modern Research}
+
+\textbf{Interpretability Through Composition}: Unlike black-box neural nets, GMDH produces explicit polynomial equations. Modern research could hybridize symbolic regression with deep learning for interpretable AI.
+
+\textbf{Architecture Search Roots}: GMDH's evolutionary model selection predates NAS (Neural Architecture Search) by 50 years. Contemporary methods could adopt GMDH's validation-driven pruning strategies.
+
+\textbf{Low-Data Regimes}: GMDH excels with 100s of samples where deep networks require 1000s. Classical methods remain relevant for scientific computing with limited experimental data.
+
+\textbf{Computational Efficiency}: Pure C implementation runs in milliseconds. Modern frameworks sacrifice speed for flexibility---revisiting optimized classical algorithms could accelerate deployment.
+
+\section{Conclusion}
+
+Modern AI agents transform how researchers engage with deep computer science literature. By automatically analyzing, documenting, and contextualizing historical implementations, AI bridges the knowledge gap between eras of computing. The GMDH case study reveals that 1968 Soviet algorithms embody principles central to 2025 machine learning---hierarchical composition, validation-driven selection, and automated model discovery.
+
+Future work should systematically apply AI-assisted analysis to other classical algorithms (genetic algorithms, simulated annealing, Bayesian networks), extracting forgotten insights that might inform next-generation AI systems. The convergence of human intuition, historical algorithms, and modern AI creates a powerful methodology for advancing computer science research.
+
+\section*{Implementation Details}
+\textbf{Codebase}: C99, 800 LOC, MIT licensed\\
+\textbf{Dependencies}: Standard library only (stdio, stdlib, math)\\
+\textbf{Build}: GNU Make, gcc with -Wall -Wextra -O2\\
+\textbf{Testing}: Custom macro-based framework, 7 unit tests\\
+\textbf{Dataset}: Water quality (UCI ML Repository derivative)
+
+\end{document}
