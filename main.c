@@ -41,9 +41,19 @@ void run_demo() {
     printf("\n\n=== running multi-row gmdh ===\n");
     gmdh_layer_t *layers = multirow_gmdh(train, valid, 3, 5);
     
-    printf("\nfinal best model from layer 2:\n");
-    if (layers[2].n_models > 0) {
-        print_model(&layers[2].models[0], train->feature_names);
+    // find best layer overall
+    int best_layer = 0;
+    double best_rmse = layers[0].models[0].error;
+    for (int i = 1; i < 3; i++) {
+        if (layers[i].n_models > 0 && layers[i].models[0].error < best_rmse) {
+            best_rmse = layers[i].models[0].error;
+            best_layer = i;
+        }
+    }
+    
+    printf("\nbest overall model from layer %d:\n", best_layer);
+    if (layers[best_layer].n_models > 0) {
+        print_model(&layers[best_layer].models[0], train->feature_names);
     }
     
     // cleanup

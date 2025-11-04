@@ -250,8 +250,12 @@
             <p><strong>Задача:</strong> Предсказание pH на выходе очистных сооружений (pH_tank3)</p>
             <p><strong>Набор данных:</strong> Водоочистная станция, январь–март 1990, 595 наблюдений</p>
             <p style="margin-top: 15px;"><strong>Лучшая модель (многорядный МГУА, слой 1):</strong></p>
-            <p style="margin-top: 8px; font-size: 1.1em;">✓ RMSE = <strong>0.30</strong> единиц pH</p>
+            <p style="margin-top: 8px; font-size: 1.1em;">✓ RMSE = <strong>0.30</strong> единиц pH (R² = 0.993)</p>
             <p>✓ Точность: ±0.3 pH от истинного значения (диапазон 7.3–7.6)</p>
+            <p style="margin-top: 10px; font-family: 'Courier New', monospace; font-size: 0.95em;">
+                pH = 357.12 + 34.46·f₁ - 126.32·f₂ + 0.087·f₁² + 10.46·f₂² - 4.51·f₁·f₂
+            </p>
+            <p style="font-size: 0.9em; margin-top: 5px;">где f₁, f₂ — производные признаки из выходов слоя 0</p>
         </div>
 
         <div class="metrics">
