@@ -2,14 +2,21 @@
 
 import { useState } from "react";
 import Papa from "papaparse";
-import { GMDHRunner } from "~/components/GMDHRunner";
+import { GMDHRunner, type GMDHResults } from "~/components/GMDHRunner";
 import { DataPreview } from "~/components/DataPreview";
+import { AIPreprocessing } from "~/components/AIPreprocessing";
+import { AIAlgorithmSelect } from "~/components/AIAlgorithmSelect";
+import { AIAnalysis } from "~/components/AIAnalysis";
+
+type Step = "upload" | "preprocess" | "select-target" | "algorithm" | "run" | "results";
 
 export default function Home() {
   const [data, setData] = useState<number[][] | null>(null);
   const [headers, setHeaders] = useState<string[]>([]);
   const [targetColumn, setTargetColumn] = useState<number | null>(null);
   const [error, setError] = useState<string>("");
+  const [step, setStep] = useState<Step>("upload");
+  const [results, setResults] = useState<GMDHResults | null>(null);
 
   const parseCSV = (file: File) => {
     Papa.parse(file, {
@@ -30,12 +37,12 @@ export default function Home() {
           for (let i = 1; i < rawData.length; i++) {
             const row = rawData[i];
             if (!row || row.length === 0) continue;
-            
+
             const numRow = row.map((val) => {
               const num = parseFloat(val);
               return isNaN(num) ? NaN : num;
             });
-            
+
             if (numRow.some((v) => !isNaN(v))) {
               numericData.push(numRow);
             }
@@ -49,6 +56,7 @@ export default function Home() {
           setData(numericData);
           setError("");
           setTargetColumn(null);
+          setStep("preprocess");
         } catch (err) {
           setError(`parsing error: ${err}`);
         }
@@ -77,15 +85,38 @@ export default function Home() {
     }
   };
 
+  const handleTargetSelect = (col: number | null) => {
+    setTargetColumn(col);
+    if (col !== null) {
+      setStep("algorithm");
+    }
+  };
+
+  const handleResults = (newResults: GMDHResults) => {
+    setResults(newResults);
+    setStep("results");
+  };
+
   return (
     <main className="min-h-screen p-8 max-w-7xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2">gmdh analysis</h1>
-        <p className="text-gray-600 dark:text-gray-400">
-          upload csv dataset and run group method of data handling
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold mb-2">gmdh analysis with ai</h1>
+            <p className="text-gray-600 dark:text-gray-400">
+              ai-powered data preprocessing, algorithm selection, and results analysis
+            </p>
+          </div>
+          <a
+            href="/agent"
+            className="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-lg font-medium transition-colors shadow-lg"
+          >
+            coding agent →
+          </a>
+        </div>
       </div>
 
+      {/* step 1: upload */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
         <h2 className="text-xl font-semibold mb-4">1. upload csv file</h2>
         <div className="flex gap-4 items-center mb-4">
@@ -110,23 +141,52 @@ export default function Home() {
         )}
       </div>
 
-      {data && headers.length > 0 && (
-        <>
-          <DataPreview
-            data={data}
-            headers={headers}
-            targetColumn={targetColumn}
-            onTargetSelect={setTargetColumn}
-          />
+      {/* step 2: ai preprocessing */}
+      {data && headers.length > 0 && step === "preprocess" && (
+        <AIPreprocessing
+          data={data}
+          headers={headers}
+          onComplete={() => setStep("select-target")}
+        />
+      )}
 
-          {targetColumn !== null && (
-            <GMDHRunner
-              data={data}
-              headers={headers}
-              targetColumn={targetColumn}
-            />
-          )}
-        </>
+      {/* step 3: select target column */}
+      {data && headers.length > 0 && (step === "select-target" || step === "algorithm" || step === "run" || step === "results") && (
+        <DataPreview
+          data={data}
+          headers={headers}
+          targetColumn={targetColumn}
+          onTargetSelect={handleTargetSelect}
+        />
+      )}
+
+      {/* step 4: ai algorithm selection */}
+      {data && targetColumn !== null && step === "algorithm" && (
+        <AIAlgorithmSelect
+          data={data}
+          headers={headers}
+          targetColumn={targetColumn}
+          onComplete={() => setStep("run")}
+        />
+      )}
+
+      {/* step 5: run gmdh */}
+      {data && targetColumn !== null && (step === "run" || step === "results") && (
+        <GMDHRunner
+          data={data}
+          headers={headers}
+          targetColumn={targetColumn}
+          onResults={handleResults}
+        />
+      )}
+
+      {/* step 6: ai analysis */}
+      {results && targetColumn !== null && step === "results" && (
+        <AIAnalysis
+          results={results}
+          targetName={headers[targetColumn]}
+          features={headers.filter((_, idx) => idx !== targetColumn)}
+        />
       )}
     </main>
   );

@@ -11,7 +11,8 @@
   },
   "dependencies": {
     "@ai-sdk/gateway": "^2.0.15",
-    "ai": "^5.0.101",
+    "@ai-sdk/openai": "^1",
+    "ai": "^4",
     "next": "^14.2.0",
     "papaparse": "^5.4.1",
     "react": "^18.3.0",

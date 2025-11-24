@@ -4,20 +4,23 @@ import { useState } from "react";
 import { runGMDH, PolynomialModel, GMDHLayer } from "~/lib/gmdh";
 import { ModelResults } from "./ModelResults";
 
+export interface GMDHResults {
+  combinatorial: PolynomialModel[];
+  multirow: GMDHLayer[];
+  trainSize: number;
+  validSize: number;
+}
+
 interface GMDHRunnerProps {
   data: number[][];
   headers: string[];
   targetColumn: number;
+  onResults?: (results: GMDHResults) => void;
 }
 
-export function GMDHRunner({ data, headers, targetColumn }: GMDHRunnerProps) {
+export function GMDHRunner({ data, headers, targetColumn, onResults }: GMDHRunnerProps) {
   const [running, setRunning] = useState(false);
-  const [results, setResults] = useState<{
-    combinatorial: PolynomialModel[];
-    multirow: GMDHLayer[];
-    trainSize: number;
-    validSize: number;
-  } | null>(null);
+  const [results, setResults] = useState<GMDHResults | null>(null);
   const [error, setError] = useState<string>("");
 
   const handleRun = async () => {
@@ -31,6 +34,7 @@ export function GMDHRunner({ data, headers, targetColumn }: GMDHRunnerProps) {
 
       const result = runGMDH(data, targetColumn, 0.7);
       setResults(result);
+      onResults?.(result);
     } catch (err) {
       setError(`error running gmdh: ${err}`);
     } finally {
