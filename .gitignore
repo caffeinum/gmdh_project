@@ -21,3 +21,7 @@ test_gmdh
 *.dSYM/
 core
 vgcore.*
+
+# bun
+node_modules
+
