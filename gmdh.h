@@ -33,6 +33,14 @@ typedef struct {
     int layer;
 } gmdh_layer_t;
 
+typedef struct {
+    double *coeffs;
+    int *feature_indices;
+    int n_features;
+    double error;
+    double r2;
+} linear_model_t;
+
 // data loading
 dataset_t* load_csv(const char *filename, int target_col);
 void free_dataset(dataset_t *ds);
@@ -45,8 +53,15 @@ double predict_polynomial(double x1, double x2, double *coeffs);
 double calculate_rmse(double *pred, double *actual, int n);
 double calculate_r2(double *pred, double *actual, int n);
 
-// combinatorial gmdh
+// combinatorial gmdh (quadratic pairs)
 polynomial_model_t* combinatorial_gmdh(dataset_t *train, dataset_t *valid, int *n_models);
+
+// combinatorial gmdh (linear multivariate)
+linear_model_t* linear_combinatorial_gmdh(dataset_t *train, dataset_t *valid,
+                                          int min_features, int max_features,
+                                          int *n_models);
+void print_linear_model(linear_model_t *model, char **feature_names);
+void free_linear_models(linear_model_t *models, int n_models);
 
 // multi-row gmdh
 gmdh_layer_t* multirow_gmdh(dataset_t *train, dataset_t *valid, int n_layers, int models_per_layer);
