@@ -145,3 +145,37 @@ make test                 # run unit tests
 - `gmdh_linear_combinatorial.c` - linear multivariate approach
 - `gmdh_multirow.c` - multi-layer GMDH
 - `test_example.c` - test on academic paper sample data
+
+## GMDH Web Interface (gmdh-web/)
+
+ai-powered web interface built with next.js 14 and vercel ai sdk.
+
+### ai features:
+
+1. **data preprocessing** (`/api/ai/preprocess`) - analyzes dataset statistics and suggests cleaning steps
+2. **algorithm selection** (`/api/ai/algorithm-select`) - recommends which gmdh variant based on data characteristics
+3. **results analysis** (`/api/ai/analyze`) - interprets model performance and provides insights
+4. **coding agent** (`/agent`) - interactive ai assistant for custom implementations
+
+### tech stack:
+
+- next.js 14 with app router
+- vercel ai sdk v4 + @ai-sdk/openai v1
+- typescript
+- tailwindcss + recharts
+- pure typescript gmdh implementation
+
+### setup:
+
+```bash
+cd gmdh-web
+bun install
+cp .env.example .env  # add OPENAI_API_KEY
+bun run dev
+```
+
+### workflow:
+
+1. upload csv → 2. ai preprocessing suggestions → 3. select target → 4. ai algorithm recommendation → 5. run gmdh → 6. ai analysis
+
+components: `AIPreprocessing`, `AIAlgorithmSelect`, `AIAnalysis` all use `useChat` from `ai/react`
