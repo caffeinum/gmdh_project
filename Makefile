@@ -53,8 +53,19 @@ example: $(EXAMPLE_BIN)
 	@echo "running example test..."
 	@$(EXAMPLE_BIN)
 
+# latex compilation
+pdf: article.tex
+	@echo "compiling latex to pdf..."
+	@pdflatex -interaction=nonstopmode article.tex > /dev/null || true
+	@pdflatex -interaction=nonstopmode article.tex > /dev/null || true
+	@echo "article.pdf created"
+
 clean:
 	@echo "cleaning build artifacts..."
 	@rm -rf $(BUILD_DIR) $(BIN_DIR)
 
-.PHONY: all test run example clean
+clean-latex:
+	@echo "cleaning latex intermediate files..."
+	@rm -f *.aux *.log *.out *.toc *.lof *.lot *.fls *.fdb_latexmk *.synctex.gz *.bbl *.blg
+
+.PHONY: all test run example pdf clean clean-latex
