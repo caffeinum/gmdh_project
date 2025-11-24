@@ -109,3 +109,39 @@ bun --hot ./index.ts
 ```
 
 For more information, read the Bun API docs in `node_modules/bun-types/docs/**.md`.
+
+## GMDH Implementation
+
+This project implements GMDH (Group Method of Data Handling) in C.
+
+### Two Implementations:
+
+1. **Quadratic Pairs** (`gmdh_combinatorial.c`):
+   - Tries all pairs of features (xi, xj)
+   - Fits bivariate quadratic polynomials: `y = a0 + a1*xi + a2*xj + a3*xi² + a4*xj² + a5*xi*xj`
+   - Good for modeling non-linear relationships
+
+2. **Linear Multivariate** (`gmdh_linear_combinatorial.c`):
+   - Tries all subsets of features (any combination size)
+   - Fits simple linear regression: `y = a0 + a1*x1 + a2*x2 + ... + an*xn`
+   - Matches classical GMDH papers methodology
+   - Use this for reproducing academic results
+
+### Building and Testing:
+
+```bash
+make clean && make all    # build all binaries
+make example              # run test on example_test_sample.csv
+make run                  # run water quality demo
+make test                 # run unit tests
+```
+
+### Key Files:
+
+- `gmdh.h` - main header with type definitions
+- `data.c` - csv loading and data utilities
+- `polynomial.c` - polynomial fitting and evaluation
+- `gmdh_combinatorial.c` - quadratic pairs approach
+- `gmdh_linear_combinatorial.c` - linear multivariate approach
+- `gmdh_multirow.c` - multi-layer GMDH
+- `test_example.c` - test on academic paper sample data
