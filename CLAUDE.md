@@ -160,17 +160,51 @@ ai-powered web interface built with next.js 14 and vercel ai sdk.
 ### tech stack:
 
 - next.js 14 with app router
-- vercel ai sdk v4 + @ai-sdk/openai v1
+- vercel ai sdk v5 (`ai`, `@ai-sdk/react`, `@ai-sdk/gateway`)
+- react-markdown for ai response rendering
 - typescript
 - tailwindcss + recharts
 - pure typescript gmdh implementation
+
+### key patterns:
+
+```tsx
+// useChat with DefaultChatTransport for custom api endpoints
+import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
+
+const transport = useMemo(
+  () => new DefaultChatTransport({ api: "/api/ai/endpoint", body: { data } }),
+  [data]
+);
+const { messages, status, sendMessage } = useChat({ transport });
+
+// status values: "streaming" | "submitted" | "ready"
+// send message: sendMessage({ text: "..." })
+```
+
+```tsx
+// api route with gateway
+import { createGateway } from "@ai-sdk/gateway";
+import { streamText } from "ai";
+
+const gateway = createGateway({ apiKey: process.env.AI_GATEWAY_API_KEY });
+
+export async function POST(req: Request) {
+  const result = streamText({
+    model: gateway("openai/gpt-4o-mini"),
+    messages,
+  });
+  return result.toUIMessageStreamResponse();
+}
+```
 
 ### setup:
 
 ```bash
 cd gmdh-web
 bun install
-cp .env.example .env  # add OPENAI_API_KEY
+cp .env.example .env  # add AI_GATEWAY_API_KEY
 bun run dev
 ```
 
@@ -178,4 +212,4 @@ bun run dev
 
 1. upload csv → 2. ai preprocessing suggestions → 3. select target → 4. ai algorithm recommendation → 5. run gmdh → 6. ai analysis
 
-components: `AIPreprocessing`, `AIAlgorithmSelect`, `AIAnalysis` all use `useChat` from `ai/react`
+components: `AIPreprocessing`, `AIAlgorithmSelect`, `AIAnalysis` all use `useChat` from `@ai-sdk/react` with `DefaultChatTransport`
