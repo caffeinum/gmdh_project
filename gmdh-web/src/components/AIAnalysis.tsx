@@ -71,11 +71,9 @@ export function AIAnalysis({ results, targetName, features }: AIAnalysisProps) {
             .map((message, i) => (
               <div
                 key={i}
-                className="p-4 bg-indigo-50 dark:bg-gray-700 rounded-lg"
+                className="p-4 bg-indigo-50 dark:bg-gray-700 rounded-lg prose dark:prose-invert prose-sm max-w-none"
               >
-                <Markdown className="prose dark:prose-invert prose-sm max-w-none">
-                  {getMessageText(message)}
-                </Markdown>
+                <Markdown>{getMessageText(message)}</Markdown>
               </div>
             ))}
         </div>

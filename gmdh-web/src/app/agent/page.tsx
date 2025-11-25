@@ -56,12 +56,14 @@ export default function AgentPage() {
               <div className="font-semibold text-sm mb-1 text-gray-600 dark:text-gray-400">
                 {message.role === "user" ? "you" : "agent"}
               </div>
-              <Markdown className="prose dark:prose-invert prose-sm max-w-none">
-                {message.parts
-                  ?.filter((p) => p.type === "text")
-                  .map((p) => (p as { type: "text"; text: string }).text)
-                  .join("") || ""}
-              </Markdown>
+              <div className="prose dark:prose-invert prose-sm max-w-none">
+                <Markdown>
+                  {message.parts
+                    ?.filter((p) => p.type === "text")
+                    .map((p) => (p as { type: "text"; text: string }).text)
+                    .join("") || ""}
+                </Markdown>
+              </div>
             </div>
           ))}
 

@@ -97,11 +97,9 @@ export function AIAlgorithmSelect({
             .map((message, i) => (
               <div
                 key={i}
-                className="p-4 bg-purple-50 dark:bg-gray-700 rounded-lg mb-4"
+                className="p-4 bg-purple-50 dark:bg-gray-700 rounded-lg mb-4 prose dark:prose-invert prose-sm max-w-none"
               >
-                <Markdown className="prose dark:prose-invert prose-sm max-w-none">
-                  {getMessageText(message)}
-                </Markdown>
+                <Markdown>{getMessageText(message)}</Markdown>
               </div>
             ))}
         </div>
