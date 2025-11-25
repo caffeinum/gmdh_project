@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { useChat } from "ai/react";
+import { useState, useEffect, useMemo } from "react";
+import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
 
 interface AIAlgorithmSelectProps {
   data: number[][];
@@ -20,23 +21,37 @@ export function AIAlgorithmSelect({
 
   const features = headers.filter((_, idx) => idx !== targetColumn);
 
-  const { messages, isLoading, error, reload } = useChat({
-    api: "/api/ai/algorithm-select",
-    body: {
-      dataStats: {
-        rows: data.length,
-        columns: headers.length,
+  const transport = useMemo(
+    () => new DefaultChatTransport({
+      api: "/api/ai/algorithm-select",
+      body: {
+        dataStats: { rows: data.length, columns: headers.length },
+        target: headers[targetColumn],
+        features,
       },
-      target: headers[targetColumn],
-      features,
-    },
-    onFinish: () => {
+    }),
+    [data, headers, targetColumn, features]
+  );
+
+  const { messages, status, error, sendMessage } = useChat({ transport });
+
+  const isLoading = status === "streaming" || status === "submitted";
+
+  useEffect(() => {
+    if (status === "ready" && messages.length > 0) {
       setAnalyzed(true);
-    },
-  });
+    }
+  }, [status, messages.length]);
 
   const handleAnalyze = () => {
-    reload();
+    sendMessage({ text: "recommend algorithm" });
+  };
+
+  const getMessageText = (message: typeof messages[0]) => {
+    return message.parts
+      ?.filter((p) => p.type === "text")
+      .map((p) => (p as { type: "text"; text: string }).text)
+      .join("") || "";
   };
 
   return (
@@ -54,14 +69,18 @@ export function AIAlgorithmSelect({
         </p>
       </div>
 
-      {!analyzed && (
+      {!analyzed && !isLoading && messages.length === 0 && (
         <button
           onClick={handleAnalyze}
           disabled={isLoading}
           className="px-6 py-3 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors"
         >
-          {isLoading ? "analyzing..." : "get ai recommendation"}
+          get ai recommendation
         </button>
+      )}
+
+      {isLoading && (
+        <div className="text-purple-600 animate-pulse">analyzing...</div>
       )}
 
       {error && (
@@ -80,7 +99,7 @@ export function AIAlgorithmSelect({
                 className="p-4 bg-purple-50 dark:bg-gray-700 rounded-lg mb-4"
               >
                 <div className="prose dark:prose-invert max-w-none text-sm whitespace-pre-wrap">
-                  {message.content}
+                  {getMessageText(message)}
                 </div>
               </div>
             ))}

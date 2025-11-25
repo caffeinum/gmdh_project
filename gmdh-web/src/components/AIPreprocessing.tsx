@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { useChat } from "ai/react";
+import { useState, useEffect, useMemo } from "react";
+import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
 
 interface AIPreprocessingProps {
   data: number[][];
@@ -16,16 +17,30 @@ export function AIPreprocessing({
 }: AIPreprocessingProps) {
   const [analyzed, setAnalyzed] = useState(false);
 
-  const { messages, isLoading, error, reload } = useChat({
-    api: "/api/ai/preprocess",
-    body: { data, headers },
-    onFinish: () => {
+  const transport = useMemo(
+    () => new DefaultChatTransport({ api: "/api/ai/preprocess", body: { data, headers } }),
+    [data, headers]
+  );
+
+  const { messages, status, error, sendMessage } = useChat({ transport });
+
+  const isLoading = status === "streaming" || status === "submitted";
+
+  useEffect(() => {
+    if (status === "ready" && messages.length > 0) {
       setAnalyzed(true);
-    },
-  });
+    }
+  }, [status, messages.length]);
 
   const handleAnalyze = () => {
-    reload();
+    sendMessage({ text: "analyze this dataset" });
+  };
+
+  const getMessageText = (message: typeof messages[0]) => {
+    return message.parts
+      ?.filter((p) => p.type === "text")
+      .map((p) => (p as { type: "text"; text: string }).text)
+      .join("") || "";
   };
 
   return (
@@ -38,14 +53,18 @@ export function AIPreprocessing({
         let ai analyze your data and suggest preprocessing steps
       </p>
 
-      {!analyzed && (
+      {!analyzed && !isLoading && messages.length === 0 && (
         <button
           onClick={handleAnalyze}
           disabled={isLoading}
           className="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors"
         >
-          {isLoading ? "analyzing..." : "analyze data"}
+          analyze data
         </button>
+      )}
+
+      {isLoading && (
+        <div className="text-blue-600 animate-pulse">analyzing...</div>
       )}
 
       {error && (
@@ -64,7 +83,7 @@ export function AIPreprocessing({
                 className="p-4 bg-blue-50 dark:bg-gray-700 rounded-lg mb-4"
               >
                 <div className="prose dark:prose-invert max-w-none text-sm whitespace-pre-wrap">
-                  {message.content}
+                  {getMessageText(message)}
                 </div>
               </div>
             ))}

@@ -1,6 +1,8 @@
 "use client";
 
-import { useChat } from "ai/react";
+import { useMemo } from "react";
+import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
 import type { GMDHResults } from "./GMDHRunner";
 
 interface AIAnalysisProps {
@@ -10,17 +12,27 @@ interface AIAnalysisProps {
 }
 
 export function AIAnalysis({ results, targetName, features }: AIAnalysisProps) {
-  const { messages, isLoading, error, reload } = useChat({
-    api: "/api/ai/analyze",
-    body: {
-      results,
-      targetName,
-      features,
-    },
-  });
+  const transport = useMemo(
+    () => new DefaultChatTransport({
+      api: "/api/ai/analyze",
+      body: { results, targetName, features },
+    }),
+    [results, targetName, features]
+  );
+
+  const { messages, status, error, sendMessage } = useChat({ transport });
+
+  const isLoading = status === "streaming" || status === "submitted";
 
   const handleAnalyze = () => {
-    reload();
+    sendMessage({ text: "analyze these results" });
+  };
+
+  const getMessageText = (message: typeof messages[0]) => {
+    return message.parts
+      ?.filter((p) => p.type === "text")
+      .map((p) => (p as { type: "text"; text: string }).text)
+      .join("") || "";
   };
 
   return (
@@ -31,13 +43,19 @@ export function AIAnalysis({ results, targetName, features }: AIAnalysisProps) {
         let ai interpret your gmdh results and provide insights
       </p>
 
-      <button
-        onClick={handleAnalyze}
-        disabled={isLoading}
-        className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors"
-      >
-        {isLoading ? "analyzing..." : "analyze results with ai"}
-      </button>
+      {messages.length === 0 && !isLoading && (
+        <button
+          onClick={handleAnalyze}
+          disabled={isLoading}
+          className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors"
+        >
+          analyze results with ai
+        </button>
+      )}
+
+      {isLoading && (
+        <div className="text-indigo-600 animate-pulse">analyzing...</div>
+      )}
 
       {error && (
         <div className="mt-4 p-3 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded">
@@ -55,7 +73,7 @@ export function AIAnalysis({ results, targetName, features }: AIAnalysisProps) {
                 className="p-4 bg-indigo-50 dark:bg-gray-700 rounded-lg"
               >
                 <div className="prose dark:prose-invert max-w-none text-sm whitespace-pre-wrap">
-                  {message.content}
+                  {getMessageText(message)}
                 </div>
               </div>
             ))}

@@ -1,8 +1,8 @@
-import { createOpenAI } from "@ai-sdk/openai";
+import { createGateway } from "@ai-sdk/gateway";
 import { streamText } from "ai";
 
-const openai = createOpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+const gateway = createGateway({
+  apiKey: process.env.AI_GATEWAY_API_KEY,
 });
 
 export const runtime = "edge";
@@ -11,7 +11,7 @@ export async function POST(req: Request) {
   const { dataStats, target, features } = await req.json();
 
   const result = streamText({
-    model: openai("gpt-4o-mini"),
+    model: gateway("openai/gpt-4o-mini"),
     system: `you are a gmdh algorithm expert. recommend which gmdh variant to use based on dataset characteristics. be concise and explain why.`,
     messages: [
       {
@@ -32,5 +32,5 @@ explain your recommendation and expected performance.`,
     ],
   });
 
-  return result.toDataStreamResponse();
+  return result.toUIMessageStreamResponse();
 }

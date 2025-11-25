@@ -1,12 +1,22 @@
 "use client";
 
-import { useChat } from "ai/react";
+import { useState, useMemo } from "react";
+import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
 
 export default function AgentPage() {
-  const { messages, input, handleInputChange, handleSubmit, isLoading } =
-    useChat({
-      api: "/api/ai/agent",
-    });
+  const [input, setInput] = useState("");
+  const transport = useMemo(() => new DefaultChatTransport({ api: "/api/ai/agent" }), []);
+  const { messages, sendMessage, status } = useChat({ transport });
+
+  const isLoading = status === "streaming" || status === "submitted";
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim() || isLoading) return;
+    sendMessage({ text: input });
+    setInput("");
+  };
 
   return (
     <main className="min-h-screen p-8 max-w-4xl mx-auto">
@@ -46,7 +56,9 @@ export default function AgentPage() {
                 {message.role === "user" ? "you" : "agent"}
               </div>
               <div className="prose dark:prose-invert max-w-none text-sm whitespace-pre-wrap">
-                {message.content}
+                {message.parts?.map((part, i) =>
+                  part.type === "text" ? <span key={i}>{part.text}</span> : null
+                )}
               </div>
             </div>
           ))}
@@ -62,7 +74,7 @@ export default function AgentPage() {
           <input
             type="text"
             value={input}
-            onChange={handleInputChange}
+            onChange={(e) => setInput(e.target.value)}
             placeholder="describe what you need help with..."
             className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
             disabled={isLoading}
