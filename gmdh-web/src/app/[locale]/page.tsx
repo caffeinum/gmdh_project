@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import Papa from "papaparse";
+import Markdown from "react-markdown";
 import { GMDHRunner, type GMDHResults } from "~/components/GMDHRunner";
 import { DataPreview } from "~/components/DataPreview";
 import { AIPreprocessing } from "~/components/AIPreprocessing";
@@ -227,8 +228,8 @@ export default function Home() {
         )}
 
         {extractionSummary && (
-          <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-200 rounded text-sm">
-            {extractionSummary}
+          <div className="mt-4 p-4 bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-200 rounded text-sm prose prose-sm dark:prose-invert max-w-none">
+            <Markdown>{extractionSummary}</Markdown>
           </div>
         )}
 
