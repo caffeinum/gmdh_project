@@ -109,3 +109,49 @@ bun --hot ./index.ts
 ```
 
 For more information, read the Bun API docs in `node_modules/bun-types/docs/**.md`.
+
+## AI SDK
+
+uses vercel ai sdk v5 with anthropic provider for ai features.
+
+### code execution with container skills
+
+to use claude's code execution tool with document processing:
+
+```ts
+import { createAnthropic } from "@ai-sdk/anthropic";
+import { generateText, stepCountIs } from "ai";
+
+const anthropic = createAnthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+const result = await generateText({
+  model: anthropic("claude-sonnet-4-5-20250929"),
+  providerOptions: {
+    anthropic: {
+      container: {
+        skills: [
+          { type: "anthropic", skillId: "xlsx" },
+          { type: "anthropic", skillId: "docx" },
+          { type: "anthropic", skillId: "pdf" },
+        ],
+      },
+    },
+  },
+  tools: {
+    code_execution: anthropic.tools.codeExecution_20250825(),
+  },
+  stopWhen: stepCountIs(10),
+  messages: [{
+    role: "user",
+    content: [
+      { type: "text", text: "convert file to csv" },
+      { type: "file", data: base64Data, mediaType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" },
+    ],
+  }],
+});
+```
+
+### i18n
+
+uses next-intl with locale routing. translations in `messages/{en,ru,uk}.json`.
+api routes accept `locale` param to respond in the user's language.
