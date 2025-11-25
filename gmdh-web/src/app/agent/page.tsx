@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
+import Markdown from "react-markdown";
 
 export default function AgentPage() {
   const [input, setInput] = useState("");
@@ -55,11 +56,12 @@ export default function AgentPage() {
               <div className="font-semibold text-sm mb-1 text-gray-600 dark:text-gray-400">
                 {message.role === "user" ? "you" : "agent"}
               </div>
-              <div className="prose dark:prose-invert max-w-none text-sm whitespace-pre-wrap">
-                {message.parts?.map((part, i) =>
-                  part.type === "text" ? <span key={i}>{part.text}</span> : null
-                )}
-              </div>
+              <Markdown className="prose dark:prose-invert prose-sm max-w-none">
+                {message.parts
+                  ?.filter((p) => p.type === "text")
+                  .map((p) => (p as { type: "text"; text: string }).text)
+                  .join("") || ""}
+              </Markdown>
             </div>
           ))}
 

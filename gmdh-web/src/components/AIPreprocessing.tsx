@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
+import Markdown from "react-markdown";
 
 interface AIPreprocessingProps {
   data: number[][];
@@ -82,9 +83,9 @@ export function AIPreprocessing({
                 key={i}
                 className="p-4 bg-blue-50 dark:bg-gray-700 rounded-lg mb-4"
               >
-                <div className="prose dark:prose-invert max-w-none text-sm whitespace-pre-wrap">
+                <Markdown className="prose dark:prose-invert prose-sm max-w-none">
                   {getMessageText(message)}
-                </div>
+                </Markdown>
               </div>
             ))}
         </div>
