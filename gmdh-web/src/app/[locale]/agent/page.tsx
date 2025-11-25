@@ -3,11 +3,20 @@
 import { useState, useMemo } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
+import { useTranslations, useLocale } from "next-intl";
 import Markdown from "react-markdown";
+import { LanguageSwitcher } from "~/components/LanguageSwitcher";
 
 export default function AgentPage() {
+  const t = useTranslations("agent");
+  const tCommon = useTranslations("common");
+  const locale = useLocale();
   const [input, setInput] = useState("");
-  const transport = useMemo(() => new DefaultChatTransport({ api: "/api/ai/agent" }), []);
+
+  const transport = useMemo(
+    () => new DefaultChatTransport({ api: "/api/ai/agent", body: { locale } }),
+    [locale]
+  );
   const { messages, sendMessage, status } = useChat({ transport });
 
   const isLoading = status === "streaming" || status === "submitted";
@@ -22,9 +31,12 @@ export default function AgentPage() {
   return (
     <main className="min-h-screen p-8 max-w-4xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2">coding agent</h1>
+        <div className="flex items-center justify-between mb-2">
+          <h1 className="text-4xl font-bold">{t("title")}</h1>
+          <LanguageSwitcher />
+        </div>
         <p className="text-gray-600 dark:text-gray-400">
-          ask me to help with data analysis, gmdh implementations, or write code
+          {t("subtitle")}
         </p>
       </div>
 
@@ -32,14 +44,12 @@ export default function AgentPage() {
         <div className="space-y-4 mb-6 max-h-[60vh] overflow-y-auto">
           {messages.length === 0 && (
             <div className="text-center py-12 text-gray-500">
-              <p className="text-lg mb-4">
-                what would you like me to help you with?
-              </p>
+              <p className="text-lg mb-4">{t("empty.title")}</p>
               <div className="text-sm space-y-2">
-                <p>• analyze your gmdh results</p>
-                <p>• write custom preprocessing code</p>
-                <p>• implement new features</p>
-                <p>• debug issues</p>
+                <p>• {t("empty.analyze")}</p>
+                <p>• {t("empty.preprocess")}</p>
+                <p>• {t("empty.implement")}</p>
+                <p>• {t("empty.debug")}</p>
               </div>
             </div>
           )}
@@ -54,7 +64,7 @@ export default function AgentPage() {
               }`}
             >
               <div className="font-semibold text-sm mb-1 text-gray-600 dark:text-gray-400">
-                {message.role === "user" ? "you" : "agent"}
+                {message.role === "user" ? t("you") : t("assistant")}
               </div>
               <div className="prose dark:prose-invert prose-sm max-w-none">
                 <Markdown>
@@ -69,7 +79,7 @@ export default function AgentPage() {
 
           {isLoading && (
             <div className="text-center text-gray-500">
-              <div className="inline-block animate-pulse">thinking...</div>
+              <div className="inline-block animate-pulse">{t("thinking")}</div>
             </div>
           )}
         </div>
@@ -79,7 +89,7 @@ export default function AgentPage() {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="describe what you need help with..."
+            placeholder={t("placeholder")}
             className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
             disabled={isLoading}
           />
@@ -88,17 +98,17 @@ export default function AgentPage() {
             disabled={isLoading || !input.trim()}
             className="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors"
           >
-            send
+            {tCommon("send")}
           </button>
         </form>
       </div>
 
       <div className="text-center">
         <a
-          href="/"
+          href={`/${locale}`}
           className="text-blue-600 dark:text-blue-400 hover:underline"
         >
-          ← back to gmdh analysis
+          ← {t("backToAnalysis")}
         </a>
       </div>
     </main>

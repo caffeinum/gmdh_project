@@ -5,34 +5,41 @@ const gateway = createGateway({
   apiKey: process.env.AI_GATEWAY_API_KEY,
 });
 
+const langInstructions: Record<string, string> = {
+  en: "Respond in English.",
+  ru: "Отвечай на русском языке.",
+  uk: "Відповідай українською мовою.",
+};
+
 export const runtime = "edge";
 
 export async function POST(req: Request) {
-  const { results, targetName, features } = await req.json();
+  const { results, targetName, features, locale = "en" } = await req.json();
+  const langInstruction = langInstructions[locale] || langInstructions.en;
 
   const result = streamText({
     model: gateway("openai/gpt-5-mini"),
-    system: `you are a gmdh results analyst. interpret model results and provide actionable insights. be concise and focus on practical implications.`,
+    system: `You are a GMDH results analyst. Interpret model results and provide actionable insights. Be concise and focus on practical implications. ${langInstruction}`,
     messages: [
       {
         role: "user",
-        content: `gmdh results for predicting ${targetName}:
+        content: `GMDH results for predicting ${targetName}:
 
-top models:
+Top models:
 ${JSON.stringify(results.combinatorial.slice(0, 5), null, 2)}
 
-training set: ${results.trainSize} samples
-validation set: ${results.validSize} samples
+Training set: ${results.trainSize} samples
+Validation set: ${results.validSize} samples
 
-features: ${features.join(", ")}
+Features: ${features.join(", ")}
 
-analyze these results:
-1. model performance (r2, error metrics)
-2. which feature pairs are most important
-3. potential overfitting or underfitting
-4. recommendations for improvement
+Analyze these results:
+1. Model performance (R², error metrics)
+2. Which feature pairs are most important
+3. Potential overfitting or underfitting
+4. Recommendations for improvement
 
-be specific and actionable.`,
+Be specific and actionable.`,
       },
     ],
   });

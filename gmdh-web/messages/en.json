@@ -1,0 +1,81 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "analyzing": "Analyzing...",
+    "continue": "Continue",
+    "back": "Back",
+    "send": "Send"
+  },
+  "home": {
+    "title": "GMDH Analysis with AI",
+    "subtitle": "AI-powered data preprocessing, algorithm selection, and results analysis",
+    "codingAgent": "Coding Agent"
+  },
+  "upload": {
+    "title": "1. Upload CSV File",
+    "placeholder": "Choose file...",
+    "or": "or",
+    "loadSample": "Load Sample Dataset"
+  },
+  "dataPreview": {
+    "title": "Data Preview",
+    "selectTarget": "Select Target Column",
+    "samples": "samples",
+    "features": "features",
+    "showingRows": "Showing first {count} of {total} rows"
+  },
+  "preprocessing": {
+    "title": "2. AI Data Preprocessing",
+    "description": "Let AI analyze your data and suggest preprocessing steps",
+    "analyze": "Analyze Data",
+    "continue": "Continue to Algorithm Selection"
+  },
+  "algorithm": {
+    "title": "3. AI Algorithm Selection",
+    "target": "Target",
+    "features": "features",
+    "columns": "columns",
+    "getRecommendation": "Get AI Recommendation",
+    "continue": "Continue to Run Analysis"
+  },
+  "runner": {
+    "title": "4. Run GMDH Analysis",
+    "trainSplit": "Training Split",
+    "maxPolynomials": "Max Polynomials",
+    "runAnalysis": "Run GMDH Analysis",
+    "running": "Running GMDH analysis...",
+    "results": "Results",
+    "topModels": "Top Models",
+    "model": "Model",
+    "r2": "R²",
+    "rmse": "RMSE",
+    "features": "Features"
+  },
+  "analysis": {
+    "title": "AI Results Analysis",
+    "description": "Let AI interpret your GMDH results and provide insights",
+    "analyze": "Analyze Results with AI"
+  },
+  "agent": {
+    "title": "Coding Agent",
+    "subtitle": "Ask me to help with data analysis, GMDH implementations, or write code",
+    "placeholder": "Describe what you need help with...",
+    "empty": {
+      "title": "What would you like me to help you with?",
+      "analyze": "Analyze your GMDH results",
+      "preprocess": "Write custom preprocessing code",
+      "implement": "Implement new features",
+      "debug": "Debug issues"
+    },
+    "you": "You",
+    "assistant": "Agent",
+    "thinking": "Thinking...",
+    "backToAnalysis": "Back to GMDH Analysis"
+  },
+  "language": {
+    "en": "English",
+    "ru": "Russian",
+    "uk": "Ukrainian"
+  }
+}

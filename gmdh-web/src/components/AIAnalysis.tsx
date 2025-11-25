@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
+import { useTranslations } from "next-intl";
 import Markdown from "react-markdown";
 import type { GMDHResults } from "./GMDHRunner";
 
@@ -10,15 +11,19 @@ interface AIAnalysisProps {
   results: GMDHResults;
   targetName: string;
   features: string[];
+  locale: string;
 }
 
-export function AIAnalysis({ results, targetName, features }: AIAnalysisProps) {
+export function AIAnalysis({ results, targetName, features, locale }: AIAnalysisProps) {
+  const t = useTranslations("analysis");
+  const tCommon = useTranslations("common");
+
   const transport = useMemo(
     () => new DefaultChatTransport({
       api: "/api/ai/analyze",
-      body: { results, targetName, features },
+      body: { results, targetName, features, locale },
     }),
-    [results, targetName, features]
+    [results, targetName, features, locale]
   );
 
   const { messages, status, error, sendMessage } = useChat({ transport });
@@ -38,10 +43,10 @@ export function AIAnalysis({ results, targetName, features }: AIAnalysisProps) {
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
-      <h2 className="text-xl font-semibold mb-4">ai results analysis</h2>
+      <h2 className="text-xl font-semibold mb-4">{t("title")}</h2>
 
       <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-        let ai interpret your gmdh results and provide insights
+        {t("description")}
       </p>
 
       {messages.length === 0 && !isLoading && (
@@ -50,17 +55,17 @@ export function AIAnalysis({ results, targetName, features }: AIAnalysisProps) {
           disabled={isLoading}
           className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors"
         >
-          analyze results with ai
+          {t("analyze")}
         </button>
       )}
 
       {isLoading && (
-        <div className="text-indigo-600 animate-pulse">analyzing...</div>
+        <div className="text-indigo-600 animate-pulse">{tCommon("analyzing")}</div>
       )}
 
       {error && (
         <div className="mt-4 p-3 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded">
-          error: {error.message}
+          {tCommon("error")}: {error.message}
         </div>
       )}
 

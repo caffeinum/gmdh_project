@@ -3,12 +3,14 @@
 import { useState, useEffect, useMemo } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
+import { useTranslations } from "next-intl";
 import Markdown from "react-markdown";
 
 interface AIAlgorithmSelectProps {
   data: number[][];
   headers: string[];
   targetColumn: number;
+  locale: string;
   onComplete: () => void;
 }
 
@@ -16,8 +18,11 @@ export function AIAlgorithmSelect({
   data,
   headers,
   targetColumn,
+  locale,
   onComplete,
 }: AIAlgorithmSelectProps) {
+  const t = useTranslations("algorithm");
+  const tCommon = useTranslations("common");
   const [analyzed, setAnalyzed] = useState(false);
 
   const features = headers.filter((_, idx) => idx !== targetColumn);
@@ -29,9 +34,10 @@ export function AIAlgorithmSelect({
         dataStats: { rows: data.length, columns: headers.length },
         target: headers[targetColumn],
         features,
+        locale,
       },
     }),
-    [data, headers, targetColumn, features]
+    [data, headers, targetColumn, features, locale]
   );
 
   const { messages, status, error, sendMessage } = useChat({ transport });
@@ -57,16 +63,14 @@ export function AIAlgorithmSelect({
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
-      <h2 className="text-xl font-semibold mb-4">
-        3. ai algorithm selection
-      </h2>
+      <h2 className="text-xl font-semibold mb-4">{t("title")}</h2>
 
       <div className="mb-4">
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          target: <span className="font-semibold">{headers[targetColumn]}</span>
+          {t("target")}: <span className="font-semibold">{headers[targetColumn]}</span>
         </p>
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          features: {features.length} columns
+          {t("features")}: {features.length} {t("columns")}
         </p>
       </div>
 
@@ -76,17 +80,17 @@ export function AIAlgorithmSelect({
           disabled={isLoading}
           className="px-6 py-3 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors"
         >
-          get ai recommendation
+          {t("getRecommendation")}
         </button>
       )}
 
       {isLoading && (
-        <div className="text-purple-600 animate-pulse">analyzing...</div>
+        <div className="text-purple-600 animate-pulse">{tCommon("analyzing")}</div>
       )}
 
       {error && (
         <div className="mt-4 p-3 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded">
-          error: {error.message}
+          {tCommon("error")}: {error.message}
         </div>
       )}
 
@@ -110,7 +114,7 @@ export function AIAlgorithmSelect({
           onClick={onComplete}
           className="mt-4 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
         >
-          continue to run analysis →
+          {t("continue")} →
         </button>
       )}
     </div>

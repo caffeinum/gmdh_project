@@ -3,24 +3,29 @@
 import { useState, useEffect, useMemo } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
+import { useTranslations } from "next-intl";
 import Markdown from "react-markdown";
 
 interface AIPreprocessingProps {
   data: number[][];
   headers: string[];
+  locale: string;
   onComplete: () => void;
 }
 
 export function AIPreprocessing({
   data,
   headers,
+  locale,
   onComplete,
 }: AIPreprocessingProps) {
+  const t = useTranslations("preprocessing");
+  const tCommon = useTranslations("common");
   const [analyzed, setAnalyzed] = useState(false);
 
   const transport = useMemo(
-    () => new DefaultChatTransport({ api: "/api/ai/preprocess", body: { data, headers } }),
-    [data, headers]
+    () => new DefaultChatTransport({ api: "/api/ai/preprocess", body: { data, headers, locale } }),
+    [data, headers, locale]
   );
 
   const { messages, status, error, sendMessage } = useChat({ transport });
@@ -46,12 +51,10 @@ export function AIPreprocessing({
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
-      <h2 className="text-xl font-semibold mb-4">
-        2. ai data preprocessing
-      </h2>
+      <h2 className="text-xl font-semibold mb-4">{t("title")}</h2>
 
       <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-        let ai analyze your data and suggest preprocessing steps
+        {t("description")}
       </p>
 
       {!analyzed && !isLoading && messages.length === 0 && (
@@ -60,17 +63,17 @@ export function AIPreprocessing({
           disabled={isLoading}
           className="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors"
         >
-          analyze data
+          {t("analyze")}
         </button>
       )}
 
       {isLoading && (
-        <div className="text-blue-600 animate-pulse">analyzing...</div>
+        <div className="text-blue-600 animate-pulse">{tCommon("analyzing")}</div>
       )}
 
       {error && (
         <div className="mt-4 p-3 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded">
-          error: {error.message}
+          {tCommon("error")}: {error.message}
         </div>
       )}
 
@@ -94,7 +97,7 @@ export function AIPreprocessing({
           onClick={onComplete}
           className="mt-4 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
         >
-          continue to algorithm selection →
+          {t("continue")} →
         </button>
       )}
     </div>

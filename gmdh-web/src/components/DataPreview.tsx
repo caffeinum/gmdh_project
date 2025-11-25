@@ -1,3 +1,7 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+
 interface DataPreviewProps {
   data: number[][];
   headers: string[];
@@ -11,17 +15,18 @@ export function DataPreview({
   targetColumn,
   onTargetSelect,
 }: DataPreviewProps) {
+  const t = useTranslations("dataPreview");
   const isSelectable = !!onTargetSelect;
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
       <h2 className="text-xl font-semibold mb-4">
-        {isSelectable ? "select target column" : "data preview"}
+        {isSelectable ? t("selectTarget") : t("title")}
       </h2>
 
       <div className="mb-4">
         <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-          dataset: {data.length} samples × {headers.length} features
+          {data.length} {t("samples")} × {headers.length} {t("features")}
         </p>
       </div>
 
@@ -82,7 +87,7 @@ export function DataPreview({
         </table>
         {data.length > 5 && (
           <p className="text-xs text-gray-500 mt-2">
-            showing first 5 of {data.length} rows
+            {t("showingRows", { count: 5, total: data.length })}
           </p>
         )}
       </div>

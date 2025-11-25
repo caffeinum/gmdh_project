@@ -5,31 +5,38 @@ const gateway = createGateway({
   apiKey: process.env.AI_GATEWAY_API_KEY,
 });
 
+const langInstructions: Record<string, string> = {
+  en: "Respond in English.",
+  ru: "Отвечай на русском языке.",
+  uk: "Відповідай українською мовою.",
+};
+
 export const runtime = "edge";
 
 export async function POST(req: Request) {
-  const { data, headers } = await req.json();
+  const { data, headers, locale = "en" } = await req.json();
 
   const stats = computeStats(data, headers);
+  const langInstruction = langInstructions[locale] || langInstructions.en;
 
   const result = streamText({
     model: gateway("openai/gpt-5-mini"),
-    system: `you are a data preprocessing expert. analyze the dataset and suggest preprocessing steps for gmdh analysis. keep responses concise and actionable.`,
+    system: `You are a data preprocessing expert. Analyze the dataset and suggest preprocessing steps for GMDH analysis. Keep responses concise and actionable. ${langInstruction}`,
     messages: [
       {
         role: "user",
-        content: `dataset stats:
-- columns: ${headers.join(", ")}
-- rows: ${data.length}
-- stats: ${JSON.stringify(stats, null, 2)}
+        content: `Dataset stats:
+- Columns: ${headers.join(", ")}
+- Rows: ${data.length}
+- Stats: ${JSON.stringify(stats, null, 2)}
 
-suggest preprocessing steps for this dataset before running gmdh. consider:
-1. missing values
-2. outliers
-3. normalization/scaling
-4. feature engineering
+Suggest preprocessing steps for this dataset before running GMDH. Consider:
+1. Missing values
+2. Outliers
+3. Normalization/scaling
+4. Feature engineering
 
-be concise and specific to this data.`,
+Be concise and specific to this data.`,
       },
     ],
   });

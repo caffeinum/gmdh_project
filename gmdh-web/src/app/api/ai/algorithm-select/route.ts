@@ -5,29 +5,36 @@ const gateway = createGateway({
   apiKey: process.env.AI_GATEWAY_API_KEY,
 });
 
+const langInstructions: Record<string, string> = {
+  en: "Respond in English.",
+  ru: "Отвечай на русском языке.",
+  uk: "Відповідай українською мовою.",
+};
+
 export const runtime = "edge";
 
 export async function POST(req: Request) {
-  const { dataStats, target, features } = await req.json();
+  const { dataStats, target, features, locale = "en" } = await req.json();
+  const langInstruction = langInstructions[locale] || langInstructions.en;
 
   const result = streamText({
     model: gateway("openai/gpt-5-mini"),
-    system: `you are a gmdh algorithm expert. recommend which gmdh variant to use based on dataset characteristics. be concise and explain why.`,
+    system: `You are a GMDH algorithm expert. Recommend which GMDH variant to use based on dataset characteristics. Be concise and explain why. ${langInstruction}`,
     messages: [
       {
         role: "user",
-        content: `dataset info:
-- target variable: ${target}
-- features: ${features.length} (${features.join(", ")})
-- sample size: ${dataStats.rows}
-- data stats: ${JSON.stringify(dataStats, null, 2)}
+        content: `Dataset info:
+- Target variable: ${target}
+- Features: ${features.length} (${features.join(", ")})
+- Sample size: ${dataStats.rows}
+- Data stats: ${JSON.stringify(dataStats, null, 2)}
 
-recommend which gmdh approach to use:
-1. combinatorial gmdh (quadratic pairs) - good for non-linear relationships
-2. linear multivariate gmdh - good for linear relationships, matches academic papers
-3. multi-layer gmdh - good for complex hierarchical patterns
+Recommend which GMDH approach to use:
+1. Combinatorial GMDH (quadratic pairs) - good for non-linear relationships
+2. Linear multivariate GMDH - good for linear relationships, matches academic papers
+3. Multi-layer GMDH - good for complex hierarchical patterns
 
-explain your recommendation and expected performance.`,
+Explain your recommendation and expected performance.`,
       },
     ],
   });
