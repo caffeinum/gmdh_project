@@ -13,10 +13,13 @@
     "codingAgent": "Coding Agent"
   },
   "upload": {
-    "title": "1. Upload CSV File",
+    "title": "1. Upload Data File",
     "placeholder": "Choose file...",
     "or": "or",
-    "loadSample": "Load Sample Dataset"
+    "loadSample": "Load Sample Dataset",
+    "supported": "Supported formats",
+    "extracting": "Extracting data with AI...",
+    "extractingDesc": "Claude is analyzing your document and converting to CSV format"
   },
   "dataPreview": {
     "title": "Data Preview",

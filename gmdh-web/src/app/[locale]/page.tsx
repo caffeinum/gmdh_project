@@ -10,7 +10,9 @@ import { AIAlgorithmSelect } from "~/components/AIAlgorithmSelect";
 import { AIAnalysis } from "~/components/AIAnalysis";
 import { LanguageSwitcher } from "~/components/LanguageSwitcher";
 
-type Step = "upload" | "preprocess" | "select-target" | "algorithm" | "run" | "results";
+type Step = "upload" | "extracting" | "preprocess" | "select-target" | "algorithm" | "run" | "results";
+
+const SUPPORTED_EXTENSIONS = [".csv", ".xlsx", ".xls", ".docx", ".pdf"];
 
 export default function Home() {
   const t = useTranslations();
@@ -21,9 +23,10 @@ export default function Home() {
   const [error, setError] = useState<string>("");
   const [step, setStep] = useState<Step>("upload");
   const [results, setResults] = useState<GMDHResults | null>(null);
+  const [extractionSummary, setExtractionSummary] = useState<string>("");
 
-  const parseCSV = (file: File) => {
-    Papa.parse(file, {
+  const processCSVData = (csvText: string) => {
+    Papa.parse(csvText, {
       complete: (results) => {
         try {
           const rawData = results.data as string[][];
@@ -81,25 +84,72 @@ export default function Home() {
           setError(`Parsing error: ${err}`);
         }
       },
-      error: (err) => {
+      error: (err: Error) => {
         setError(`CSV error: ${err.message}`);
       },
     });
   };
 
+  const parseCSV = (file: File) => {
+    file.text().then(processCSVData);
+  };
+
+  const extractDataWithAI = async (file: File) => {
+    setStep("extracting");
+    setError("");
+    setExtractionSummary("");
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("locale", locale);
+
+      const response = await fetch("/api/ai/extract-data", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to extract data");
+      }
+
+      if (result.summary) {
+        setExtractionSummary(result.summary);
+      }
+
+      if (result.csv) {
+        processCSVData(result.csv);
+      } else {
+        throw new Error("No CSV data returned");
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Extraction failed");
+      setStep("upload");
+    }
+  };
+
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-    parseCSV(file);
+
+    const ext = file.name.toLowerCase().slice(file.name.lastIndexOf("."));
+
+    if (ext === ".csv") {
+      parseCSV(file);
+    } else if (SUPPORTED_EXTENSIONS.includes(ext)) {
+      extractDataWithAI(file);
+    } else {
+      setError(`Unsupported file type. Supported: ${SUPPORTED_EXTENSIONS.join(", ")}`);
+    }
   };
 
   const loadSampleDataset = async () => {
     try {
       const response = await fetch("/water_quality.csv");
       const text = await response.text();
-      const blob = new Blob([text], { type: "text/csv" });
-      const file = new File([blob], "water_quality.csv", { type: "text/csv" });
-      parseCSV(file);
+      processCSVData(text);
     } catch (err) {
       setError(`Failed to load sample dataset: ${err}`);
     }
@@ -141,21 +191,47 @@ export default function Home() {
 
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
         <h2 className="text-xl font-semibold mb-4">{t("upload.title")}</h2>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+          {t("upload.supported")}: CSV, Excel (.xlsx, .xls), Word (.docx), PDF
+        </p>
         <div className="flex gap-4 items-center mb-4">
           <input
             type="file"
-            accept=".csv"
+            accept=".csv,.xlsx,.xls,.docx,.pdf"
             onChange={handleFileUpload}
-            className="flex-1 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 dark:bg-gray-700 dark:border-gray-600 p-2"
+            disabled={step === "extracting"}
+            className="flex-1 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 dark:bg-gray-700 dark:border-gray-600 p-2 disabled:opacity-50"
           />
           <span className="text-gray-500">{t("upload.or")}</span>
           <button
             onClick={loadSampleDataset}
-            className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors whitespace-nowrap"
+            disabled={step === "extracting"}
+            className="px-4 py-2 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors whitespace-nowrap"
           >
             {t("upload.loadSample")}
           </button>
         </div>
+
+        {step === "extracting" && (
+          <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+            <div className="flex items-center gap-3">
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+              <span className="text-blue-600 dark:text-blue-400">
+                {t("upload.extracting")}
+              </span>
+            </div>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+              {t("upload.extractingDesc")}
+            </p>
+          </div>
+        )}
+
+        {extractionSummary && (
+          <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-200 rounded text-sm">
+            {extractionSummary}
+          </div>
+        )}
+
         {error && (
           <div className="mt-4 p-3 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded">
             {error}
@@ -163,7 +239,7 @@ export default function Home() {
         )}
       </div>
 
-      {data && headers.length > 0 && step !== "upload" && (
+      {data && headers.length > 0 && step !== "upload" && step !== "extracting" && (
         <DataPreview
           data={data}
           headers={headers}
