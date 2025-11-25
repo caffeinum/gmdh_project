@@ -13,7 +13,7 @@ export async function POST(req: Request) {
   const stats = computeStats(data, headers);
 
   const result = streamText({
-    model: gateway("openai/gpt-4o-mini"),
+    model: gateway("openai/gpt-5-mini"),
     system: `you are a data preprocessing expert. analyze the dataset and suggest preprocessing steps for gmdh analysis. keep responses concise and actionable.`,
     messages: [
       {

@@ -11,7 +11,7 @@ export async function POST(req: Request) {
   const { results, targetName, features } = await req.json();
 
   const result = streamText({
-    model: gateway("openai/gpt-4o-mini"),
+    model: gateway("openai/gpt-5-mini"),
     system: `you are a gmdh results analyst. interpret model results and provide actionable insights. be concise and focus on practical implications.`,
     messages: [
       {
