@@ -5,6 +5,7 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useTranslations } from "next-intl";
 import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface AIAlgorithmSelectProps {
   data: number[][];
@@ -103,7 +104,7 @@ export function AIAlgorithmSelect({
                 key={i}
                 className="p-4 bg-purple-50 dark:bg-gray-700 rounded-lg mb-4 prose dark:prose-invert prose-sm max-w-none"
               >
-                <Markdown>{getMessageText(message)}</Markdown>
+                <Markdown remarkPlugins={[remarkGfm]}>{getMessageText(message)}</Markdown>
               </div>
             ))}
         </div>

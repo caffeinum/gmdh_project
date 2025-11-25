@@ -5,6 +5,7 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useTranslations } from "next-intl";
 import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import type { GMDHResults } from "./GMDHRunner";
 
 interface AIAnalysisProps {
@@ -78,7 +79,7 @@ export function AIAnalysis({ results, targetName, features, locale }: AIAnalysis
                 key={i}
                 className="p-4 bg-indigo-50 dark:bg-gray-700 rounded-lg prose dark:prose-invert prose-sm max-w-none"
               >
-                <Markdown>{getMessageText(message)}</Markdown>
+                <Markdown remarkPlugins={[remarkGfm]}>{getMessageText(message)}</Markdown>
               </div>
             ))}
         </div>

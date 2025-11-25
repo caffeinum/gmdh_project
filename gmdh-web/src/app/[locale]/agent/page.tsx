@@ -5,6 +5,7 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useTranslations, useLocale } from "next-intl";
 import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { LanguageSwitcher } from "~/components/LanguageSwitcher";
 
 export default function AgentPage() {
@@ -67,7 +68,7 @@ export default function AgentPage() {
                 {message.role === "user" ? t("you") : t("assistant")}
               </div>
               <div className="prose dark:prose-invert prose-sm max-w-none">
-                <Markdown>
+                <Markdown remarkPlugins={[remarkGfm]}>
                   {message.parts
                     ?.filter((p) => p.type === "text")
                     .map((p) => (p as { type: "text"; text: string }).text)
