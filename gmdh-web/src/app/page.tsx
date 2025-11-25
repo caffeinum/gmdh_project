@@ -28,31 +28,50 @@ export default function Home() {
             return;
           }
 
-          // extract headers
-          const header = rawData[0] || [];
-          setHeaders(header);
+          const allHeaders = rawData[0] || [];
+          const dataRows = rawData.slice(1).filter((row) => row && row.length > 0);
 
-          // parse numeric data
+          // detect numeric columns (>80% valid numbers)
+          const numericCols: number[] = [];
+          for (let col = 0; col < allHeaders.length; col++) {
+            let validCount = 0;
+            for (const row of dataRows) {
+              const val = row[col];
+              if (val !== undefined && val !== "" && !isNaN(parseFloat(val))) {
+                validCount++;
+              }
+            }
+            if (validCount / dataRows.length > 0.8) {
+              numericCols.push(col);
+            }
+          }
+
+          if (numericCols.length === 0) {
+            setError("no numeric columns found");
+            return;
+          }
+
+          // extract only numeric columns
+          const filteredHeaders = numericCols.map((col) => allHeaders[col]);
           const numericData: number[][] = [];
-          for (let i = 1; i < rawData.length; i++) {
-            const row = rawData[i];
-            if (!row || row.length === 0) continue;
 
-            const numRow = row.map((val) => {
-              const num = parseFloat(val);
-              return isNaN(num) ? NaN : num;
+          for (const row of dataRows) {
+            const numRow = numericCols.map((col) => {
+              const val = row[col];
+              return val !== undefined && val !== "" ? parseFloat(val) : NaN;
             });
-
-            if (numRow.some((v) => !isNaN(v))) {
+            // only keep rows with all valid values
+            if (numRow.every((v) => !isNaN(v))) {
               numericData.push(numRow);
             }
           }
 
           if (numericData.length === 0) {
-            setError("no valid numeric data found");
+            setError("no complete numeric rows found");
             return;
           }
 
+          setHeaders(filteredHeaders);
           setData(numericData);
           setError("");
           setTargetColumn(null);
@@ -141,22 +160,22 @@ export default function Home() {
         )}
       </div>
 
+      {/* data preview - shown from step 2 onwards */}
+      {data && headers.length > 0 && step !== "upload" && (
+        <DataPreview
+          data={data}
+          headers={headers}
+          targetColumn={targetColumn}
+          onTargetSelect={step === "select-target" ? handleTargetSelect : undefined}
+        />
+      )}
+
       {/* step 2: ai preprocessing */}
       {data && headers.length > 0 && step === "preprocess" && (
         <AIPreprocessing
           data={data}
           headers={headers}
           onComplete={() => setStep("select-target")}
-        />
-      )}
-
-      {/* step 3: select target column */}
-      {data && headers.length > 0 && (step === "select-target" || step === "algorithm" || step === "run" || step === "results") && (
-        <DataPreview
-          data={data}
-          headers={headers}
-          targetColumn={targetColumn}
-          onTargetSelect={handleTargetSelect}
         />
       )}
 
