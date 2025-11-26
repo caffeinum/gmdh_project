@@ -306,10 +306,13 @@ export function multirowGMDH(
   return layers;
 }
 
+export type GMDHAlgorithm = "combinatorial" | "multirow" | "both";
+
 export function runGMDH(
   data: number[][],
   targetColumn: number,
-  trainRatio: number = 0.7
+  trainRatio: number = 0.7,
+  algorithm: GMDHAlgorithm = "both"
 ): GMDHResults {
   // separate features and target
   const features = data.map((row) =>
@@ -320,14 +323,12 @@ export function runGMDH(
   // split into train/validation
   const { train, valid } = splitDataset(features, target, trainRatio);
 
-  // run combinatorial gmdh
-  const combModels = combinatorialGMDH(train, valid);
-
-  // run multi-row gmdh
-  const layers = multirowGMDH(train, valid, 3, 5);
+  // run selected algorithm(s)
+  const combModels = algorithm === "multirow" ? [] : combinatorialGMDH(train, valid);
+  const layers = algorithm === "combinatorial" ? [] : multirowGMDH(train, valid, 3, 5);
 
   return {
-    combinatorial: combModels.slice(0, 10), // top 10 models
+    combinatorial: combModels.slice(0, 10),
     multirow: layers,
     trainSize: train.nSamples,
     validSize: valid.nSamples,

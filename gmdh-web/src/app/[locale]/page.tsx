@@ -5,13 +5,12 @@ import { useTranslations, useLocale } from "next-intl";
 import Papa from "papaparse";
 import Markdown from "react-markdown";
 import { Tabs, TabList, Tab, TabPanel } from "~/components/Tabs";
-import { Collapsible } from "~/components/Collapsible";
 import { DataPreview } from "~/components/DataPreview";
 import { AIPreprocessing } from "~/components/AIPreprocessing";
 import { AIAlgorithmSelect } from "~/components/AIAlgorithmSelect";
 import { AIAnalysis } from "~/components/AIAnalysis";
 import { LanguageSwitcher } from "~/components/LanguageSwitcher";
-import { runGMDH, type GMDHResults } from "~/lib/gmdh";
+import { runGMDH, type GMDHResults, type GMDHAlgorithm } from "~/lib/gmdh";
 import { ModelResults } from "~/components/ModelResults";
 
 const SUPPORTED_EXTENSIONS = [".csv", ".xlsx", ".xls", ".docx", ".pdf"];
@@ -27,6 +26,8 @@ export default function Home() {
   const [extractionSummary, setExtractionSummary] = useState<string>("");
   const [results, setResults] = useState<GMDHResults | null>(null);
   const [running, setRunning] = useState(false);
+  const [activeTab, setActiveTab] = useState("data");
+  const [algorithm, setAlgorithm] = useState<GMDHAlgorithm>("both");
 
   const processCSVData = (csvText: string) => {
     Papa.parse(csvText, {
@@ -167,7 +168,7 @@ export default function Home() {
 
     try {
       await new Promise((resolve) => setTimeout(resolve, 100));
-      const result = runGMDH(data, targetColumn, 0.7);
+      const result = runGMDH(data, targetColumn, 0.7, algorithm);
       setResults(result);
     } catch (err) {
       setError(`Error running GMDH: ${err}`);
@@ -177,6 +178,7 @@ export default function Home() {
   };
 
   const featureHeaders = headers.filter((_, idx) => idx !== targetColumn);
+  const canAnalyze = data && targetColumn !== null;
 
   return (
     <main className="min-h-screen p-8 max-w-7xl mx-auto">
@@ -198,13 +200,24 @@ export default function Home() {
         </div>
       </div>
 
-      <Tabs defaultTab="data">
-        <TabList>
-          <Tab id="data">📊 {t("tabs.data")}</Tab>
-          <Tab id="analysis" disabled={!data || targetColumn === null}>
-            🔬 {t("tabs.analysis")}
-          </Tab>
-        </TabList>
+      <Tabs activeTab={activeTab} onTabChange={setActiveTab}>
+        <div className="flex items-center justify-between mb-4">
+          <TabList>
+            <Tab id="data">📊 {t("tabs.data")}</Tab>
+            <Tab id="analysis" disabled={!canAnalyze}>
+              🔬 {t("tabs.analysis")}
+            </Tab>
+          </TabList>
+
+          {canAnalyze && activeTab === "data" && (
+            <button
+              onClick={() => setActiveTab("analysis")}
+              className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors"
+            >
+              {t("tabs.analysis")} →
+            </button>
+          )}
+        </div>
 
         <TabPanel id="data">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
@@ -263,14 +276,34 @@ export default function Home() {
                   onTargetSelect={setTargetColumn}
                 />
 
-                <Collapsible title={t("preprocessing.title")} className="mt-4">
+                {targetColumn === null ? (
+                  <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                    <span className="text-sm text-yellow-800 dark:text-yellow-200">
+                      ↑ {t("dataPreview.selectTarget")}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg flex items-center justify-between">
+                    <span className="text-sm text-green-800 dark:text-green-200">
+                      ✓ {t("algorithm.target")}: <strong>{headers[targetColumn]}</strong> ({featureHeaders.length} {t("algorithm.features")})
+                    </span>
+                    <button
+                      onClick={() => setActiveTab("analysis")}
+                      className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded text-sm font-medium transition-colors"
+                    >
+                      {t("tabs.analysis")} →
+                    </button>
+                  </div>
+                )}
+
+                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                   <AIPreprocessing
                     data={data}
                     headers={headers}
                     locale={locale}
-                    onComplete={() => {}}
+                    compact
                   />
-                </Collapsible>
+                </div>
               </>
             )}
           </div>
@@ -288,24 +321,61 @@ export default function Home() {
                     {featureHeaders.length} {t("algorithm.features")}
                   </p>
                 </div>
-                <button
-                  onClick={handleRunAnalysis}
-                  disabled={running}
-                  className="px-6 py-3 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors"
-                >
-                  {running ? t("runner.running") : t("runner.runAnalysis")}
-                </button>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-3 text-sm">
+                    <label className="flex items-center gap-1.5 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="algorithm"
+                        value="both"
+                        checked={algorithm === "both"}
+                        onChange={(e) => setAlgorithm(e.target.value as GMDHAlgorithm)}
+                        className="w-4 h-4 text-green-600"
+                      />
+                      <span className="text-gray-700 dark:text-gray-300">{t("algorithm.both")}</span>
+                    </label>
+                    <label className="flex items-center gap-1.5 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="algorithm"
+                        value="combinatorial"
+                        checked={algorithm === "combinatorial"}
+                        onChange={(e) => setAlgorithm(e.target.value as GMDHAlgorithm)}
+                        className="w-4 h-4 text-green-600"
+                      />
+                      <span className="text-gray-700 dark:text-gray-300">{t("algorithm.combinatorial")}</span>
+                    </label>
+                    <label className="flex items-center gap-1.5 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="algorithm"
+                        value="multirow"
+                        checked={algorithm === "multirow"}
+                        onChange={(e) => setAlgorithm(e.target.value as GMDHAlgorithm)}
+                        className="w-4 h-4 text-green-600"
+                      />
+                      <span className="text-gray-700 dark:text-gray-300">{t("algorithm.multirow")}</span>
+                    </label>
+                  </div>
+                  <button
+                    onClick={handleRunAnalysis}
+                    disabled={running}
+                    className="px-6 py-3 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors"
+                  >
+                    {running ? t("runner.running") : t("runner.runAnalysis")}
+                  </button>
+                </div>
               </div>
 
-              <Collapsible title={t("algorithm.title")} className="mb-4">
+              <div className="mb-4 pb-4 border-b border-gray-200 dark:border-gray-700">
                 <AIAlgorithmSelect
                   data={data}
                   headers={headers}
                   targetColumn={targetColumn}
                   locale={locale}
-                  onComplete={() => {}}
+                  compact
                 />
-              </Collapsible>
+              </div>
 
               {results && (
                 <>
@@ -315,14 +385,15 @@ export default function Home() {
                     targetName={headers[targetColumn]}
                   />
 
-                  <Collapsible title={t("analysis.title")} className="mt-4">
+                  <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                     <AIAnalysis
                       results={results}
                       targetName={headers[targetColumn]}
                       features={featureHeaders}
                       locale={locale}
+                      compact
                     />
-                  </Collapsible>
+                  </div>
                 </>
               )}
             </div>

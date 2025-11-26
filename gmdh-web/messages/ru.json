@@ -40,7 +40,10 @@
     "features": "признаков",
     "columns": "колонок",
     "getRecommendation": "Получить рекомендацию ИИ",
-    "continue": "Перейти к запуску анализа"
+    "continue": "Перейти к запуску анализа",
+    "both": "Оба",
+    "combinatorial": "Комбинаторный",
+    "multirow": "Многорядный"
   },
   "runner": {
     "title": "4. Запуск GMDH-анализа",

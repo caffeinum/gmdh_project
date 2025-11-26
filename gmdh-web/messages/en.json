@@ -40,7 +40,10 @@
     "features": "features",
     "columns": "columns",
     "getRecommendation": "Get AI Recommendation",
-    "continue": "Continue to Run Analysis"
+    "continue": "Continue to Run Analysis",
+    "both": "Both",
+    "combinatorial": "Combinatorial",
+    "multirow": "Multirow"
   },
   "runner": {
     "title": "4. Run GMDH Analysis",

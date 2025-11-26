@@ -13,9 +13,10 @@ interface AIAnalysisProps {
   targetName: string;
   features: string[];
   locale: string;
+  compact?: boolean;
 }
 
-export function AIAnalysis({ results, targetName, features, locale }: AIAnalysisProps) {
+export function AIAnalysis({ results, targetName, features, locale, compact = false }: AIAnalysisProps) {
   const t = useTranslations("analysis");
   const tCommon = useTranslations("common");
 
@@ -42,48 +43,59 @@ export function AIAnalysis({ results, targetName, features, locale }: AIAnalysis
       .join("") || "";
   };
 
-  return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
-      <h2 className="text-xl font-semibold mb-4">{t("title")}</h2>
-
-      <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-        {t("description")}
-      </p>
+  const content = (
+    <>
+      {!compact && (
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+          {t("description")}
+        </p>
+      )}
 
       {messages.length === 0 && !isLoading && (
         <button
           onClick={handleAnalyze}
           disabled={isLoading}
-          className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors"
+          className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white rounded-lg text-sm font-medium transition-colors"
         >
           {t("analyze")}
         </button>
       )}
 
       {isLoading && (
-        <div className="text-indigo-600 animate-pulse">{tCommon("analyzing")}</div>
+        <div className="text-indigo-600 animate-pulse text-sm">{tCommon("analyzing")}</div>
       )}
 
       {error && (
-        <div className="mt-4 p-3 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded">
+        <div className="mt-2 p-2 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded text-sm">
           {tCommon("error")}: {error.message}
         </div>
       )}
 
       {messages.length > 0 && (
-        <div className="mt-4">
+        <div className={compact ? "" : "mt-4"}>
           {messages
             .filter((m) => m.role === "assistant")
             .map((message, i) => (
               <div
                 key={i}
-                className="p-4 bg-indigo-50 dark:bg-gray-700 rounded-lg prose dark:prose-invert prose-sm max-w-none"
+                className={`prose dark:prose-invert prose-sm max-w-none ${compact ? "" : "p-3 bg-indigo-50 dark:bg-gray-700 rounded-lg"}`}
               >
                 <Markdown remarkPlugins={[remarkGfm]}>{getMessageText(message)}</Markdown>
               </div>
             ))}
         </div>
       )}
+    </>
+  );
+
+  if (compact) {
+    return <div>{content}</div>;
+  }
+
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
+      <h2 className="text-xl font-semibold mb-4">{t("title")}</h2>
+      {content}
     </div>
   );
 }

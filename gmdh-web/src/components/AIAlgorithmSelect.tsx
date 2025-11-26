@@ -12,7 +12,8 @@ interface AIAlgorithmSelectProps {
   headers: string[];
   targetColumn: number;
   locale: string;
-  onComplete: () => void;
+  onComplete?: () => void;
+  compact?: boolean;
 }
 
 export function AIAlgorithmSelect({
@@ -21,6 +22,7 @@ export function AIAlgorithmSelect({
   targetColumn,
   locale,
   onComplete,
+  compact = false,
 }: AIAlgorithmSelectProps) {
   const t = useTranslations("algorithm");
   const tCommon = useTranslations("common");
@@ -62,47 +64,47 @@ export function AIAlgorithmSelect({
       .join("") || "";
   };
 
-  return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
-      <h2 className="text-xl font-semibold mb-4">{t("title")}</h2>
-
-      <div className="mb-4">
-        <p className="text-sm text-gray-600 dark:text-gray-400">
-          {t("target")}: <span className="font-semibold">{headers[targetColumn]}</span>
-        </p>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
-          {t("features")}: {features.length} {t("columns")}
-        </p>
-      </div>
+  const content = (
+    <>
+      {!compact && (
+        <div className="mb-4">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            {t("target")}: <span className="font-semibold">{headers[targetColumn]}</span>
+          </p>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            {t("features")}: {features.length} {t("columns")}
+          </p>
+        </div>
+      )}
 
       {!analyzed && !isLoading && messages.length === 0 && (
         <button
           onClick={handleAnalyze}
           disabled={isLoading}
-          className="px-6 py-3 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors"
+          className="px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white rounded-lg text-sm font-medium transition-colors"
         >
           {t("getRecommendation")}
         </button>
       )}
 
       {isLoading && (
-        <div className="text-purple-600 animate-pulse">{tCommon("analyzing")}</div>
+        <div className="text-purple-600 animate-pulse text-sm">{tCommon("analyzing")}</div>
       )}
 
       {error && (
-        <div className="mt-4 p-3 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded">
+        <div className="mt-2 p-2 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded text-sm">
           {tCommon("error")}: {error.message}
         </div>
       )}
 
       {messages.length > 0 && (
-        <div className="mt-4">
+        <div className={compact ? "" : "mt-4"}>
           {messages
             .filter((m) => m.role === "assistant")
             .map((message, i) => (
               <div
                 key={i}
-                className="p-4 bg-purple-50 dark:bg-gray-700 rounded-lg mb-4 prose dark:prose-invert prose-sm max-w-none"
+                className={`prose dark:prose-invert prose-sm max-w-none ${compact ? "" : "p-3 bg-purple-50 dark:bg-gray-700 rounded-lg mb-2"}`}
               >
                 <Markdown remarkPlugins={[remarkGfm]}>{getMessageText(message)}</Markdown>
               </div>
@@ -110,14 +112,25 @@ export function AIAlgorithmSelect({
         </div>
       )}
 
-      {analyzed && (
+      {analyzed && onComplete && (
         <button
           onClick={onComplete}
-          className="mt-4 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
+          className="mt-3 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors"
         >
           {t("continue")} →
         </button>
       )}
+    </>
+  );
+
+  if (compact) {
+    return <div>{content}</div>;
+  }
+
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
+      <h2 className="text-xl font-semibold mb-4">{t("title")}</h2>
+      {content}
     </div>
   );
 }

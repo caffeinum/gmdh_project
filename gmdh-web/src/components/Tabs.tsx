@@ -17,12 +17,26 @@ function useTabs() {
 
 export function Tabs({
   defaultTab,
+  activeTab: controlledActiveTab,
+  onTabChange,
   children,
 }: {
-  defaultTab: string;
+  defaultTab?: string;
+  activeTab?: string;
+  onTabChange?: (id: string) => void;
   children: ReactNode;
 }) {
-  const [activeTab, setActiveTab] = useState(defaultTab);
+  const [internalTab, setInternalTab] = useState(defaultTab || "");
+
+  const isControlled = controlledActiveTab !== undefined;
+  const activeTab = isControlled ? controlledActiveTab : internalTab;
+
+  const setActiveTab = (id: string) => {
+    if (!isControlled) {
+      setInternalTab(id);
+    }
+    onTabChange?.(id);
+  };
 
   return (
     <TabsContext.Provider value={{ activeTab, setActiveTab }}>
