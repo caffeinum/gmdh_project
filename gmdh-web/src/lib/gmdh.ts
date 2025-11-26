@@ -18,6 +18,13 @@ export interface Dataset {
   nFeatures: number;
 }
 
+export interface GMDHResults {
+  combinatorial: PolynomialModel[];
+  multirow: GMDHLayer[];
+  trainSize: number;
+  validSize: number;
+}
+
 // fit polynomial: y = a0 + a1*x1 + a2*x2 + a3*x1^2 + a4*x2^2 + a5*x1*x2
 function fitPolynomial(
   x1: number[],
@@ -303,7 +310,7 @@ export function runGMDH(
   data: number[][],
   targetColumn: number,
   trainRatio: number = 0.7
-) {
+): GMDHResults {
   // separate features and target
   const features = data.map((row) =>
     row.filter((_, idx) => idx !== targetColumn)

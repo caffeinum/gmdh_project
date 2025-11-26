@@ -76,6 +76,10 @@
     "thinking": "Думаю...",
     "backToAnalysis": "Вернуться к GMDH-анализу"
   },
+  "tabs": {
+    "data": "Данные",
+    "analysis": "Анализ"
+  },
   "language": {
     "en": "Английский",
     "ru": "Русский",
